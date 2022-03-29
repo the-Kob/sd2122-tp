@@ -12,7 +12,7 @@ public class UpdateUserClient {
         System.setProperty("java.net.preferIPv4Stack", "true");
     }
 
-    private static final String SERVICE = "users";
+    private static final String SERVICE = "UsersService";
 
     public static void main(String[] args) throws IOException {
 

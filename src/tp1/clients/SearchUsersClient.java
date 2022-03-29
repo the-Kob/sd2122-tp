@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.logging.Level;
 
+import tp1.clients.RestUsersClient;
 import tp1.server.resources.Discovery;
 import util.Debug;
 
