@@ -14,9 +14,9 @@ import tp1.server.util.CustomLoggingFilter;
 import tp1.server.util.GenericExceptionMapper;
 import util.Debug;
 
-public class UsersServer {
+public class RESTUsersServer {
 
-    private static Logger Log = Logger.getLogger(UsersServer.class.getName());
+    private static Logger Log = Logger.getLogger(RESTUsersServer.class.getName());
 
     static {
         System.setProperty("java.net.preferIPv4Stack", "true");
