@@ -17,7 +17,7 @@ public class CreateUserClient {
 		System.setProperty("java.net.preferIPv4Stack", "true");
 	}
 
-	private static final String SERVICE = "UsersService";
+	private static final String SERVICE = "users";
 	
 	public static void main(String[] args) throws IOException {
 		

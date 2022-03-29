@@ -45,7 +45,7 @@ public class Discovery {
     private String serviceName;
     private String serviceURI;
 
-    private Map<String, URI> serviceURIs;
+    private Map<String, ArrayList<URI>> serviceURIs;
     private Map<String, Long> serviceTimes;
 
     /**
@@ -125,11 +125,12 @@ public class Discovery {
                         if (tokens.length == 2) {
                             URI uri = URI.create(tokens[1]);
                             if(!this.serviceURIs.containsKey(tokens[0])) {
-                                this.serviceURIs.put(tokens[0], uri);
+                                this.serviceURIs.put(tokens[0], new ArrayList<>());
+                                this.serviceURIs.get(tokens[0]).add(uri);
                                 this.serviceTimes.put(tokens[0], System.currentTimeMillis());
                             } else {
-                                if(this.serviceURIs.get(tokens[0]) != uri) {
-                                    this.serviceURIs.put(tokens[0], uri);
+                                if(!this.serviceURIs.get(tokens[0]).contains(uri)) {
+                                    this.serviceURIs.get(tokens[0]).add(URI.create(tokens[1]));
                                     this.serviceTimes.put(tokens[0], System.currentTimeMillis());
                                 }
                             }
@@ -161,11 +162,13 @@ public class Discovery {
         List<URI> uris = new ArrayList<>();
 
         if(serviceURIs.containsKey(serviceName)) {
-            for (Map.Entry<String, URI> entry : serviceURIs.entrySet()) {
-                URI uri = entry.getValue();
+            for (Map.Entry<String, ArrayList<URI>> entry : serviceURIs.entrySet()) {
+                ArrayList<URI> knownURIs = entry.getValue();
 
                 if (entry.getKey().equalsIgnoreCase(serviceName)) {
-                    uris.add(uri);
+                    for(URI uri : knownURIs) {
+                        uris.add(uri);
+                    }
                 }
             }
             return uris.toArray(new URI[0]);
