@@ -32,11 +32,9 @@ public class WriteFileDirectoryClient {
 
         String serverUrl;
         String filename = args[0];
-        byte[] data = args[1];
+        byte[] data = args[1].getBytes();
         String userId = args[2];
         String password = args[3];
-
-        FileInfo f = new FileInfo(userId, filename, userId + "/" + filename, new HashSet<String>());
 
         System.out.println("Sending request to server.");
 
@@ -53,7 +51,7 @@ public class WriteFileDirectoryClient {
 
         Log.info("Sending request to server.");
 
-        var result = new RestUsersClient(URI.create(serverUrl)).createUser(u);
+        var result = new RestDirectoryClient(URI.create(serverUrl)).writeFile(filename, data, userId, password);
         System.out.println("Result: " + result);
     }
 

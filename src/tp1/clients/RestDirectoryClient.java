@@ -4,10 +4,12 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
 
 public class RestDirectoryClient extends RestClient implements RestDirectory {
@@ -49,7 +51,21 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
         return super.reTry( () -> clt_lsFile( userId, password ));
     }
 
-    private <T> T clt_writeFile(String filename, byte[] data, String userId, String password) {
+    private FileInfo clt_writeFile(String filename, byte[] data, String userId, String password) {
+        
+        FileInfo f = new FileInfo(userId, filename, userId + " " + filename, new HashSet<>());
+
+        Response r = target.path(f.getFileURL())
+        .queryParam("password", password).request()
+        .accept(MediaType.APPLICATION_JSON)
+        .post(Entity.entity(f, MediaType.APPLICATION_JSON));
+
+        if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
+            System.out.println("Writed File" + r.readEntity(String.class)); 
+        } else {
+            System.out.println("Error, HTTP error status: " + r.getStatus());
+    }
+
         return null;
     }
 
