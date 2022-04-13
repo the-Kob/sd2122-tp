@@ -4,18 +4,23 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.List;
 
+import jakarta.inject.Singleton;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
 import tp1.server.RESTUsersServer;
 
+@Singleton
 public class DirectoryResource implements RestDirectory {
+
+    private static Logger Log = Logger.getLogger(DirectoryResource.class.getName());
 
     public DirectoryResource(){
     }
 
     @Override
     public FileInfo writeFile(String filename, byte[] data, String userId, String password) {
-        // TODO Auto-generated method stub
+        // Check if
+
         return null;
     }
 
