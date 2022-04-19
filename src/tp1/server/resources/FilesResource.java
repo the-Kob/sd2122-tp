@@ -45,7 +45,7 @@ public class FilesResource implements RestFiles {
         String readFile = "";
         
         try {
-            File myObj = new File("filename.txt");
+            File myObj = new File(fileId);
             Scanner myReader = new Scanner(myObj);
             while (myReader.hasNextLine()) {
               String data = myReader.nextLine();
