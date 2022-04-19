@@ -76,7 +76,6 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		} else
 			System.out.println("Error, HTTP error status: " + r.getStatus() );
 
-
 		return null;
 	}
 
