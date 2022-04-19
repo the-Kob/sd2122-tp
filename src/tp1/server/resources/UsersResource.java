@@ -118,6 +118,23 @@ public class UsersResource implements RestUsers {
 		return patternedUsers;
 	}
 
+	@Override
+	public User searchForUser(String userId) {
+		if(userId == null) {
+			Log.info("UserId  null.");
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		}
+
+		User user = users.get(userId);
+
+		if( user == null ) {
+			Log.info("User does not exist.");
+			throw new WebApplicationException( Status.NOT_FOUND );
+		}
+
+		return user;
+	}
+
 	private User retrieveUser(String userId, String password) {
 		if(userId == null) {
 			Log.info("UserId  null.");

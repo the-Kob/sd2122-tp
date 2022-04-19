@@ -133,8 +133,7 @@ public class DirectoryResource implements RestDirectory {
 
         User owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
 
-        //SHARE
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userIdShare, password);
+        User user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
 
         // Check the owner of the file
         if(!file.getOwner().equals(owner.getUserId())) {
@@ -142,10 +141,11 @@ public class DirectoryResource implements RestDirectory {
             throw new WebApplicationException( Response.Status.BAD_REQUEST );
         }
 
-        // Check if the file hasn't been shared with the user before
-        if(!userFiles.get(user.getUserId()).contains(file)){
-            // Check if the user is already "registered"
-            if(!userFiles.containsKey(user.getUserId())) {
+        // Check if the user is already "registered"
+        if(!userFiles.containsKey(user.getUserId())) {
+
+            // Check if the file hasn't been shared with the user before
+            if(!userFiles.get(user.getUserId()).contains(file)){
                 userFiles.put(user.getUserId(), new LinkedList<>());
             }
 
@@ -175,7 +175,7 @@ public class DirectoryResource implements RestDirectory {
         String serverUrl = uris[0].toString();
 
         User owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userIdShare, password);
+        User user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
 
         // Check the owner of the file
         if(!file.getOwner().equals(owner.getUserId())) {

@@ -46,6 +46,10 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		return super.reTry( () -> clt_searchUsers( pattern ));
 	}
 
+	@Override
+	public User searchForUser(String userId) {
+		return super.reTry( () -> clt_searchForUser(userId));
+	}
 
 	private String clt_createUser( User user) {
 		
@@ -125,6 +129,22 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		} else {
 		System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
+
+		return null;
+	}
+
+	private User clt_searchForUser(String userId) {
+		Response r = target.path( "searchUser/" + userId )
+				.request()
+				.accept(MediaType.APPLICATION_JSON)
+				.get();
+
+		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
+			System.out.println("Success:");
+			User u = r.readEntity(User.class);
+			System.out.println( "User : " + u);
+		} else
+			System.out.println("Error, HTTP error status: " + r.getStatus() );
 
 		return null;
 	}
