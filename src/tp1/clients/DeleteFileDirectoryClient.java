@@ -46,7 +46,6 @@ public class DeleteFileDirectoryClient {
 
         Log.info("Sending request to server.");
 
-        // QUESTION: the one about void type
         var result = new RestDirectoryClient(URI.create(serverUrl)).deleteFile(filename, userId, password);
         System.out.println("Result: " + result);
     }

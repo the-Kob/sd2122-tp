@@ -1,6 +1,5 @@
 package tp1.clients;
 
-import tp1.clients.RestUsersClient;
 import tp1.server.resources.Discovery;
 
 import java.io.IOException;
