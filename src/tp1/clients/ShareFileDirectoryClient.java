@@ -47,7 +47,6 @@ public class ShareFileDirectoryClient {
 
         Log.info("Sending request to server.");
 
-        var result = new RestDirectoryClient(URI.create(serverUrl)).shareFile(filename, userId, userIdShare, password);
-        System.out.println("Result: " + result);
+        new RestDirectoryClient(URI.create(serverUrl)).shareFile(filename, userId, userIdShare, password);
     }
 }

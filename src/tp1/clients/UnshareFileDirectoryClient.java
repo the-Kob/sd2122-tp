@@ -47,7 +47,6 @@ public class UnshareFileDirectoryClient {
 
         Log.info("Sending request to server.");
 
-        var result = new RestDirectoryClient(URI.create(serverUrl)).unshareFile(filename, userId, userIdShare, password);
-        System.out.println("Result: " + result);
+        new RestDirectoryClient(URI.create(serverUrl)).unshareFile(filename, userId, userIdShare, password);
     }
 }

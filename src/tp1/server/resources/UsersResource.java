@@ -11,6 +11,10 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 import tp1.api.User;
 import tp1.api.service.rest.RestUsers;
+import tp1.api.service.util.Result;
+import tp1.api.service.util.Users;
+import tp1.api.service.util.Result.ErrorCode;
+
 
 @Singleton
 public class UsersResource implements RestUsers {
@@ -19,30 +23,23 @@ public class UsersResource implements RestUsers {
 
 	private static Logger Log = Logger.getLogger(UsersResource.class.getName());
 
+	final Users impl;;
+
+
 	public UsersResource() {
-		
+		impl = new JavaUsers();
 	}
 
 	@Override
 	public String createUser(User user) {
 		Log.info("createUser : " + user);
 
-		// Check if user data is valid
-		if(user.getUserId() == null || user.getPassword() == null || user.getFullName() == null ||
-				user.getEmail() == null) {
-			Log.info("User object invalid.");
-			throw new WebApplicationException( Status.BAD_REQUEST );
-		}
-
-		// Check if userId already exists
-		if( users.containsKey(user.getUserId())) {
-			Log.info("User already exists.");
-			throw new WebApplicationException( Status.CONFLICT );
-		}
-
-		//Add the user to the map of users
-		users.put(user.getUserId(), user);
-		return user.getUserId();
+		var result = impl.createUser(user);
+		
+		if(result.isOK())
+			return result.value();
+		else
+			throw new WebApplicationException( result.error().name() );
 	}
 
 
