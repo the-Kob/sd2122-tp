@@ -22,7 +22,7 @@ public class RESTDirectoryServer {
         System.setProperty("java.net.preferIPv4Stack", "true");
     }
 
-    public static final int PORT = 8080;
+    public static final int PORT = 8081;
     public static final String SERVICE = "directory";
     private static final String SERVER_URI_FMT = "http://%s:%s/rest";
 

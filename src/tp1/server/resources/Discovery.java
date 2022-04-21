@@ -11,6 +11,7 @@ import java.net.URI;
 import java.util.*;
 import java.util.logging.Logger;
 
+
 /**
  * <p>A class to perform service discovery, based on periodic service contact endpoint
  * announcements over multicast communication.</p>
@@ -25,6 +26,16 @@ import java.util.logging.Logger;
 public class Discovery {
     private static Logger Log = Logger.getLogger(Discovery.class.getName());
 
+    private static Discovery discovery = null;
+
+    public static Discovery getInstance(){
+        if(discovery == null){
+            discovery = new Discovery();
+        }
+
+        return discovery;
+
+    }
     static {
         // addresses some multicast issues on some TCP/IP stacks
         System.setProperty("java.net.preferIPv4Stack", "true");
@@ -52,19 +63,33 @@ public class Discovery {
      * @param  serviceName the name of the service to announce
      * @param  serviceURI an uri string - representing the contact endpoint of the service being announced
      */
+    
     public Discovery(String serviceName, String serviceURI) {
         this.serviceName = serviceName;
         this.serviceURI  = serviceURI;
         this.serviceURIs = new HashMap<>();
         this.serviceTimes = new HashMap<>();
-    }
 
+        listener();
+    }
+    
+    /*
     public Discovery(String serviceName) {
         this.serviceName = serviceName;
         this.serviceURIs = new HashMap<>();
         this.serviceTimes = new HashMap<>();
-    }
 
+        //listener(serviceName, 1);
+    }
+    */
+
+    public Discovery() {
+
+        this.serviceURIs = new HashMap<>();
+        this.serviceTimes = new HashMap<>();
+
+        listener();
+    }
     /**
      * Continuously announces a service given its name and uri
      *
@@ -83,7 +108,6 @@ public class Discovery {
                 for (;;) {
                     try {
                         Thread.sleep(DISCOVERY_PERIOD);
-                        System.out.println(pkt);
                         ds.send(pkt);
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -102,7 +126,7 @@ public class Discovery {
      * @return the discovery results as an array
      */
 
-    public void listener(String serviceName, int minRepliesNeeded) {
+    public void listener() {
         Log.info(String.format("Starting discovery on multicast group: %s, port: %d\n", DISCOVERY_ADDR.getAddress(), DISCOVERY_ADDR.getPort()));
 
         final int MAX_DATAGRAM_SIZE = 65536;
@@ -136,6 +160,8 @@ public class Discovery {
                                 }
                             }
                         }
+
+                        System.out.println(serviceURIs);
                     } catch (IOException e) {
                         e.printStackTrace();
                         try {
@@ -198,6 +224,6 @@ public class Discovery {
     }
 
     public void startListener() {
-        listener(serviceName, DISCOVERY_TIMEOUT);
+        listener();
     }
 }

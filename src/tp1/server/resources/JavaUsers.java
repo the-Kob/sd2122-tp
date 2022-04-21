@@ -138,6 +138,7 @@ public class JavaUsers  implements Users{
 		User user = users.get(userId);
 
 		if( user == null ) {
+			//TESTE
 			return Result.error(ErrorCode.NOT_FOUND);
 		}
 
