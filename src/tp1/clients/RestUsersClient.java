@@ -63,7 +63,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return r.readEntity(String.class);
+		return null;
 	}
 
 	private User clt_getUser( String userId, String password) {

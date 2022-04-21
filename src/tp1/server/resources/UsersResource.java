@@ -1,9 +1,7 @@
 package tp1.server.resources;
 
-import java.util.HashMap;
+
 import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Logger;
 
 import jakarta.inject.Singleton;
@@ -18,8 +16,6 @@ import tp1.api.service.util.Result.ErrorCode;
 
 @Singleton
 public class UsersResource implements RestUsers {
-
-	private final Map<String,User> users = new HashMap<String, User>();
 
 	private static Logger Log = Logger.getLogger(UsersResource.class.getName());
 
@@ -38,8 +34,17 @@ public class UsersResource implements RestUsers {
 		
 		if(result.isOK())
 			return result.value();
-		else
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
 	}
 
 
@@ -51,8 +56,17 @@ public class UsersResource implements RestUsers {
 		
 		if(result.isOK())
 			return result.value();
-		else
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
 	}
 
 
@@ -64,8 +78,17 @@ public class UsersResource implements RestUsers {
 		
 		if(result.isOK())
 			return result.value();
-		else
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
 
 	}
 
@@ -78,8 +101,17 @@ public class UsersResource implements RestUsers {
 		
 		if(result.isOK())
 			return result.value();
-		else
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
 
 	}
 
@@ -92,8 +124,17 @@ public class UsersResource implements RestUsers {
 		
 		if(result.isOK())
 			return result.value();
-		else
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
 
 	}
 
@@ -104,33 +145,16 @@ public class UsersResource implements RestUsers {
 		
 		if(result.isOK())
 			return result.value();
-		else
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
-	}
-
-	private User retrieveUser(String userId, String password) {
-		if(userId == null) {
-			Log.info("UserId  null.");
-			throw new WebApplicationException( Status.BAD_REQUEST );
-		}
-
-		User user = users.get(userId);
-
-		if( user == null ) {
-			Log.info("User does not exist.");
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
 			throw new WebApplicationException( Status.NOT_FOUND );
-		}
-
-		if(password == null) {
-			Log.info("password null.");
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
 			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
 		}
-
-		if( !user.getPassword().equals( password)) {
-			Log.info("Password is incorrect.");
-			throw new WebApplicationException( Status.FORBIDDEN );
-		}
-
-		return user;
 	}
 }

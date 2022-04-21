@@ -20,15 +20,17 @@ public class JavaUsers  implements Users{
 
     @Override
     public Result<String> createUser(User user) {
+
+
 		if(user.getUserId() == null || user.getPassword() == null || user.getFullName() == null ||
 				user.getEmail() == null) {
             return Result.error(ErrorCode.BAD_REQUEST);
 		}
 
 		// Check if userId already exists
-		if( users.containsKey(user.getUserId())) {
-			return Result.error(ErrorCode.CONFLICT);
-		}
+			if( users.containsKey(user.getUserId())) {
+				return Result.error(ErrorCode.CONFLICT);
+			}
 
 		//Add the user to the map of users
 		users.put(user.getUserId(), user);
