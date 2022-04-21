@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import tp1.server.resources.DirectoryResource;
 import tp1.server.resources.Discovery;
 import tp1.server.resources.UsersResource;
 import tp1.server.util.GenericExceptionMapper;
@@ -31,7 +32,7 @@ public class RESTDirectoryServer {
             Debug.setLogLevel(Level.INFO, Debug.SD2122);
 
             ResourceConfig config = new ResourceConfig();
-            config.register(UsersResource.class);
+            config.register(DirectoryResource.class);
             //config.register(CustomLoggingFilter.class);
             config.register(GenericExceptionMapper.class);
 

@@ -21,8 +21,8 @@ public class JavaDirectory implements Directory {
     private final Map<String, List<FileInfo>> userFiles;
 
     public JavaDirectory(){
-        files = new HashMap<>();
-        userFiles = new HashMap<>();
+        files = new HashMap<String, FileInfo>();
+        userFiles = new HashMap<String, List<FileInfo>>();
     }
 
     @Override

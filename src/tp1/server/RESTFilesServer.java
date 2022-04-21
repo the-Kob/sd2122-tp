@@ -9,6 +9,7 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import tp1.server.resources.Discovery;
+import tp1.server.resources.FilesResource;
 import tp1.server.resources.UsersResource;
 import tp1.server.util.GenericExceptionMapper;
 import util.Debug;
@@ -31,7 +32,7 @@ public class RESTFilesServer {
             Debug.setLogLevel(Level.INFO, Debug.SD2122);
 
             ResourceConfig config = new ResourceConfig();
-            config.register(UsersResource.class);
+            config.register(FilesResource.class);
             //config.register(CustomLoggingFilter.class);
             config.register(GenericExceptionMapper.class);
 
