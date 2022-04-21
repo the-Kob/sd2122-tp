@@ -136,7 +136,6 @@ public class JavaUsers  implements Users{
 		}
 
 		User user = users.get(userId);
-		System.out.println(userId);
 
 		if( user == null ) {
 			return Result.error(ErrorCode.NOT_FOUND);

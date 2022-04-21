@@ -19,7 +19,7 @@ public class UsersResource implements RestUsers {
 
 	private static Logger Log = Logger.getLogger(UsersResource.class.getName());
 
-	final Users impl;;
+	final Users impl;
 
 
 	public UsersResource() {

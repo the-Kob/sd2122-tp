@@ -1,241 +1,140 @@
 package tp1.server.resources;
 
-import java.net.URI;
-
 import java.util.*;
 import java.util.logging.Logger;
 
 import jakarta.inject.Singleton;
 
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import tp1.api.FileInfo;
-import tp1.api.User;
 import tp1.api.service.rest.RestDirectory;
-import tp1.clients.RestUsersClient;
+import tp1.api.service.util.Directory;
+import tp1.api.service.util.Result.ErrorCode;
+
 
 @Singleton
 public class DirectoryResource implements RestDirectory {
 
-    private static final String USER_SERVICE = "users";
-
-    private static Logger Log = Logger.getLogger(DirectoryResource.class.getName());
-
-    private final Map<String, FileInfo> files;
-    private final Map<String, List<FileInfo>> userFiles;
+    final Directory impl;
 
     public DirectoryResource(){
-        files = new HashMap<>();
-        userFiles = new HashMap<>();
+        impl = new JavaDirectory();
     }
 
     @Override
     public FileInfo writeFile(String filename, byte[] data, String userId, String password) {
 
-        FileInfo newFile = new FileInfo(userId, filename, userId + "_" + filename, new HashSet<String>() );
-
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
-        URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
-
-        String serverUrl = uris[0].toString();
-
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-
-        // Check if the file already exists
-        if(files.containsKey(filename)) {
-            FileInfo file = files.get(filename);
-
-            // Check the original owner of the file
-            if(file.getOwner().equals(user.getUserId())) {
-                file = newFile;
-
-                userFiles.get(userId).add(file);
-            } else {
-                Log.info("User isn't the owner of the original file.");
-                throw new WebApplicationException( Response.Status.BAD_REQUEST );
-            }
-        } else {
-            files.put(filename, newFile);
-
-            // Check if the user is already "registered"
-            if(!userFiles.containsKey(user.getUserId())) {
-                userFiles.put(user.getUserId(), new LinkedList<>());
-            }
-
-            userFiles.get(user.getUserId()).add(newFile);
-
-            // Search for the server in which the file is stored
-        }
-
-        return newFile;
+        var result = impl.writeFile(filename, data, userId, password);
+		
+		if(result.isOK())
+			return result.value();
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
     }
 
     @Override
     public void deleteFile(String filename, String userId, String password) {
 
-        // Check if the file doesn't exist
-        if(!files.containsKey(filename)) {
-            Log.info("File doesn't exist.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        FileInfo file = files.get(filename);
-
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
-        URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
-
-        String serverUrl = uris[0].toString();
-
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-
-        // Check the owner of the file
-        if(!file.getOwner().equals(user.getUserId())) {
-            Log.info("User isn't the owner of the file.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        files.remove(filename);
-        userFiles.get(user.getUserId()).remove(file);
+        var result = impl.deleteFile(filename, userId, password);
+		
+		if(result.error().equals(ErrorCode.BAD_REQUEST)){
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
     }
 
     @Override
     public void shareFile(String filename, String userId, String userIdShare, String password) {
         // Check if the file doesn't exist
-        if(!files.containsKey(filename)) {
-            Log.info("File doesn't exist.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        FileInfo file = files.get(filename);
-
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
-        URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
-
-        String serverUrl = uris[0].toString();
-
-        User owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-
-        User user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
-
-        // Check the owner of the file
-        if(!file.getOwner().equals(owner.getUserId())) {
-            Log.info("User isn't the owner of the file.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        // Check if the user is already "registered"
-        if(!userFiles.containsKey(user.getUserId())) {
-
-            // Check if the file hasn't been shared with the user before
-            if(!userFiles.get(user.getUserId()).contains(file)){
-                userFiles.put(user.getUserId(), new LinkedList<>());
-            }
-
-            userFiles.get(user.getUserId()).add(file);
-        }
+        var result = impl.shareFile(filename, userId, userIdShare, password);
+		
+		if(result.isOK())
+			result.value();
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
     }
 
     @Override
     public void unshareFile(String filename, String userId, String userIdShare, String password) {
         // Check if the file doesn't exist
-        if(!files.containsKey(filename)) {
-            Log.info("File doesn't exist.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        FileInfo file = files.get(filename);
-
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
-        URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
-
-        String serverUrl = uris[0].toString();
-
-        User owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-        User user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
-
-        // Check the owner of the file
-        if(!file.getOwner().equals(owner.getUserId())) {
-            Log.info("User isn't the owner of the file.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        // Check if the file hasn't been shared with the user before
-        if(userFiles.get(user.getUserId()).contains(file)){
-            userFiles.get(user.getUserId()).remove(file);
-        }
+        var result = impl.unshareFile(filename, userId, userIdShare, password);
+		
+		if(result.isOK())
+			result.value();
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
     }
 
     @Override
     public byte[] getFile(String filename, String userId, String accUserId, String password) {
-        // Check if the file doesn't exist
-        if(!files.containsKey(filename)) {
-            Log.info("File doesn't exist.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        FileInfo file = files.get(filename);
-
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
-        URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
-
-        String serverUrl = uris[0].toString();
-
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-
-        // Check if the user has access to the file
-        if(!userFiles.get(user.getUserId()).contains(file)){
-            Log.info("User doesn't have access to the file.");
-            throw new WebApplicationException( Response.Status.BAD_REQUEST );
-        }
-
-        return null;
+        var result = impl.getFile(filename, userId, accUserId, password);
+		
+		if(result.isOK())
+			return result.value();
+		else if(result.error().equals(ErrorCode.BAD_REQUEST)){
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
     }
 
     @Override
     public List<FileInfo> lsFile(String userId, String password) {
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
-        URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
+        var result = impl.lsFile(userId, password);
+        
+        if(result.isOK())
+            return result.value();
+        else if(result.error().equals(ErrorCode.BAD_REQUEST)){
+            throw new WebApplicationException( Status.BAD_REQUEST );
+        } else if(result.error().equals(ErrorCode.NOT_FOUND)){
+            throw new WebApplicationException( Status.NOT_FOUND );
+        } else if(result.error().equals(ErrorCode.CONFLICT)){
+            throw new WebApplicationException( Status.CONFLICT );
+        } else if(result.error().equals(ErrorCode.FORBIDDEN)){
+            throw new WebApplicationException( Status.FORBIDDEN );
+        } else {
+            throw new WebApplicationException( Status.NOT_IMPLEMENTED );
         }
-
-        String serverUrl = uris[0].toString();
-
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-
-        return userFiles.get(user.getUserId());
     }
 }
