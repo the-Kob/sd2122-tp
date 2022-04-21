@@ -114,6 +114,20 @@ public class JavaUsers  implements Users{
 		return Result.ok(patternedUsers);
     }
 
+	public Result<User> searchForUser(String userId) {
+		if(userId == null) {
+			return Result.error(ErrorCode.BAD_REQUEST);
+		}
+
+		User user = users.get(userId);
+
+		if( user == null ) {
+			return Result.error(ErrorCode.NOT_FOUND);
+		}
+
+		return Result.ok(user);
+	}
+
     private Result<User> retrieveUser(String userId, String password) {
 		if(userId == null) {
 			return Result.error(ErrorCode.BAD_REQUEST);

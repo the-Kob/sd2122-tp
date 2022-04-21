@@ -24,7 +24,8 @@ public class CreateUserClient {
 		Debug.setLogLevel( Level.FINE, Debug.SD2122 );
 
 		if( args.length != 4) {
-			System.err.println( "Use: java sd2122.aula2.clients.CreateUserClient userId fullName email password");
+			System.err.println( args.length);
+			System.err.println( "Use: java -cp /home/sd/sd2122.jar tp1.clients.CreateUserClient userId \"fullName\" email password");
 			return;
 		}
 

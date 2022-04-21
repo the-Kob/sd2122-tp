@@ -63,7 +63,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return null;
+		return r.readEntity(String.class);
 	}
 
 	private User clt_getUser( String userId, String password) {
@@ -80,7 +80,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		} else
 			System.out.println("Error, HTTP error status: " + r.getStatus() );
 
-		return null;
+		return r.readEntity(User.class);
 	}
 
 	private User clt_updateUser(String userId, String password, User u) {
@@ -96,7 +96,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return null;
+		return r.readEntity(User.class);
 	}
 
 	private User clt_deleteUser(String userId, String password) {
@@ -113,7 +113,7 @@ public class RestUsersClient extends RestClient implements RestUsers {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return null;
+		return r.readEntity(User.class);
 	}
 	
 	private List<User> clt_searchUsers(String pattern) {
@@ -130,7 +130,8 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return null;
+		return r.readEntity(new GenericType<List<User>>() {
+		});
 	}
 
 	private User clt_searchForUser(String userId) {
@@ -146,6 +147,6 @@ public class RestUsersClient extends RestClient implements RestUsers {
 		} else
 			System.out.println("Error, HTTP error status: " + r.getStatus() );
 
-		return null;
+		return r.readEntity(User.class);
 	}
 }

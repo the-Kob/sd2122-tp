@@ -37,7 +37,6 @@ public class GetUserClient {
 
         serverUrl = uris[0].toString();
 
-        var result = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-        System.out.println("Result: " + result);
+        new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
     }
 }

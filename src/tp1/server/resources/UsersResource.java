@@ -39,7 +39,7 @@ public class UsersResource implements RestUsers {
 		if(result.isOK())
 			return result.value();
 		else
-			throw new WebApplicationException( result.error().name() );
+			throw new WebApplicationException( Status.BAD_REQUEST );
 	}
 
 
@@ -47,7 +47,12 @@ public class UsersResource implements RestUsers {
 	public User getUser(String userId, String password) {
 		Log.info("getUser : user = " + userId + "; pwd = " + password);
 
-		return retrieveUser(userId, password);
+		var result = impl.getUser(userId, password);
+		
+		if(result.isOK())
+			return result.value();
+		else
+			throw new WebApplicationException( Status.BAD_REQUEST );
 	}
 
 
@@ -55,25 +60,13 @@ public class UsersResource implements RestUsers {
 	public User updateUser(String userId, String password, User user) {
 		Log.info("updateUser : user = " + userId + "; pwd = " + password + " ; user = " + user);
 
-		User mainUser = retrieveUser(userId, password);
+		var result = impl.updateUser(userId, password, user);
+		
+		if(result.isOK())
+			return result.value();
+		else
+			throw new WebApplicationException( Status.BAD_REQUEST );
 
-		String newPwd = user.getPassword();
-		String newFullName = user.getFullName();
-		String newEmail = user.getEmail();
-
-		if(newPwd != null) {
-			mainUser.setPassword(newPwd);
-		}
-
-		if(newFullName != null) {
-			mainUser.setFullName(newFullName);
-		}
-
-		if(newEmail != null) {
-			mainUser.setEmail(newEmail);
-		}
-
-		return mainUser;
 	}
 
 
@@ -81,9 +74,13 @@ public class UsersResource implements RestUsers {
 	public User deleteUser(String userId, String password) {
 		Log.info("deleteUser : user = " + userId + "; pwd = " + password);
 
-		User user = retrieveUser(userId, password);
+		var result = impl.deleteUser(userId, password);
+		
+		if(result.isOK())
+			return result.value();
+		else
+			throw new WebApplicationException( Status.BAD_REQUEST );
 
-		return users.remove(user.getUserId());
 	}
 
 
@@ -91,45 +88,24 @@ public class UsersResource implements RestUsers {
 	public List<User> searchUsers(String pattern) {
 		Log.info("searchUsers : pattern = " + pattern);
 
-		if(pattern == null) {
-			return new ArrayList<User>(users.values());
-		}
+		var result = impl.searchUsers(pattern);
+		
+		if(result.isOK())
+			return result.value();
+		else
+			throw new WebApplicationException( Status.BAD_REQUEST );
 
-		if(users.isEmpty()) {
-			return new ArrayList<>();
-		}
-
-		List<User> patternedUsers = new ArrayList<>();
-
-		for(Map.Entry<String, User> entry : users.entrySet()) {
-			User user = entry.getValue();
-
-			String fullNameCaps = user.getFullName().toUpperCase();
-			String patternToUpper = pattern.toUpperCase();
-
-			if(fullNameCaps.contains(patternToUpper)) {
-				patternedUsers.add(user);
-			}
-		}
-
-		return patternedUsers;
 	}
 
 	@Override
 	public User searchForUser(String userId) {
-		if(userId == null) {
-			Log.info("UserId  null.");
+
+		var result = impl.searchForUser(userId);
+		
+		if(result.isOK())
+			return result.value();
+		else
 			throw new WebApplicationException( Status.BAD_REQUEST );
-		}
-
-		User user = users.get(userId);
-
-		if( user == null ) {
-			Log.info("User does not exist.");
-			throw new WebApplicationException( Status.NOT_FOUND );
-		}
-
-		return user;
 	}
 
 	private User retrieveUser(String userId, String password) {

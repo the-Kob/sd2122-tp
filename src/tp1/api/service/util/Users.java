@@ -61,4 +61,12 @@ public interface Users {
 	 *         400 otherwise.
 	 */
 	Result<List<User>> searchUsers(String pattern);
+
+
+	/**
+	 * Search for a unique user
+	 * @param userId
+	 * @return
+	 */
+    Result<User> searchForUser(String userId);
 }
