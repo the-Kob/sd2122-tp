@@ -68,6 +68,8 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 	private User clt_getUser( String userId, String password) {
 
+		User u = null;
+
 		Response r = target.path( userId )
 				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
@@ -75,31 +77,39 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success:");
-			User u = r.readEntity(User.class);
+			u = r.readEntity(User.class);
 			System.out.println( "User : " + u);
 		} else
 			System.out.println("Error, HTTP error status: " + r.getStatus() );
 
-		return r.readEntity(User.class);
+		return u;
+
 	}
 
-	private User clt_updateUser(String userId, String password, User u) {
+	private User clt_updateUser(String userId, String password, User user) {
+		
+		User u = null;
+		
 		Response r = target.path( userId )
 				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
-				.put(Entity.entity(u, MediaType.APPLICATION_JSON));
+				.put(Entity.entity(user, MediaType.APPLICATION_JSON));
 
 		if(r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success:");
-			System.out.println( "User : " + r.readEntity(User.class));
+			u = r.readEntity(User.class);
+			System.out.println( "User : " + u);
 		} else {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return r.readEntity(User.class);
+		return u;
 	}
 
 	private User clt_deleteUser(String userId, String password) {
+		
+		User u = null;
+		
 		Response r = target.path( userId )
 				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
@@ -107,16 +117,19 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 		if(r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success:");
-			User u = r.readEntity(User.class);
+			u = r.readEntity(User.class);
 			System.out.println( "User : " + u + " was deleted.");
 		} else {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return r.readEntity(User.class);
+		return u;
 	}
 	
 	private List<User> clt_searchUsers(String pattern) {
+
+		List<User> listOfUsers = null;
+
 		Response r = target
 				.queryParam("query", pattern)
 				.request()
@@ -124,17 +137,19 @@ public class RestUsersClient extends RestClient implements RestUsers {
 				.get();
 
 		if (r.getStatus() == Status.OK.getStatusCode() && r.hasEntity()) {
-			return r.readEntity(new GenericType<List<User>>() {
+			listOfUsers = r.readEntity(new GenericType<List<User>>() {
 			});
 		} else {
 		System.out.println("Error, HTTP error status: " + r.getStatus());
 		}
 
-		return r.readEntity(new GenericType<List<User>>() {
-		});
+		return listOfUsers;
 	}
 
 	private User clt_searchForUser(String userId) {
+
+		User u = null;
+
 		Response r = target.path( "searchUser/" + userId )
 				.request()
 				.accept(MediaType.APPLICATION_JSON)
@@ -142,11 +157,11 @@ public class RestUsersClient extends RestClient implements RestUsers {
 
 		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success:");
-			User u = r.readEntity(User.class);
+			u = r.readEntity(User.class);
 			System.out.println( "User : " + u);
 		} else
 			System.out.println("Error, HTTP error status: " + r.getStatus() );
 
-		return r.readEntity(User.class);
+		return u;
 	}
 }
