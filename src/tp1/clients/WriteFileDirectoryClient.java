@@ -51,5 +51,4 @@ public class WriteFileDirectoryClient {
         var result = new RestDirectoryClient(URI.create(serverUrl)).writeFile(filename, data, userId, password);
         System.out.println("Result: " + result);
     }
-
 }
