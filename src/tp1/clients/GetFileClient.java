@@ -20,6 +20,7 @@ public class GetFileClient {
 
     public static void main(String[] args) throws IOException {
 
+        /*
         Debug.setLogLevel(Level.FINE, Debug.SD2122);
 
         if( args.length != 2) {
@@ -38,5 +39,6 @@ public class GetFileClient {
         Log.info("Sending request to server.");
         var result = new RestFilesClient(URI.create(serverUrl)).getFile(fileId, token);
         System.out.println("Result: " + result);
+        */
     }
 }

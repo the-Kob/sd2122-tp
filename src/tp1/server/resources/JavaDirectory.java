@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import org.glassfish.hk2.api.ErrorType;
-
 import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.util.Directory;

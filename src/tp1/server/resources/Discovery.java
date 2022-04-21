@@ -28,14 +28,7 @@ public class Discovery {
 
     private static Discovery discovery = null;
 
-    public static Discovery getInstance(){
-        if(discovery == null){
-            discovery = new Discovery();
-        }
-
-        return discovery;
-
-    }
+    
     static {
         // addresses some multicast issues on some TCP/IP stacks
         System.setProperty("java.net.preferIPv4Stack", "true");
@@ -52,10 +45,6 @@ public class Discovery {
     // Used separate the two fields that make up a service announcement.
     private static final String DELIMITER = "\t";
 
-    private InetSocketAddress addr;
-    private String serviceName;
-    private String serviceURI;
-
     private Map<String, ArrayList<URI>> serviceURIs;
     private Map<String, Long> serviceTimes;
 
@@ -64,31 +53,22 @@ public class Discovery {
      * @param  serviceURI an uri string - representing the contact endpoint of the service being announced
      */
     
-    public Discovery(String serviceName, String serviceURI) {
-        this.serviceName = serviceName;
-        this.serviceURI  = serviceURI;
-        this.serviceURIs = new HashMap<>();
-        this.serviceTimes = new HashMap<>();
-
-        listener();
-    }
-    
-    /*
-    public Discovery(String serviceName) {
-        this.serviceName = serviceName;
-        this.serviceURIs = new HashMap<>();
-        this.serviceTimes = new HashMap<>();
-
-        //listener(serviceName, 1);
-    }
-    */
-
     public Discovery() {
 
         this.serviceURIs = new HashMap<>();
         this.serviceTimes = new HashMap<>();
 
-        listener();
+        startListener();
+    }
+
+
+    public static Discovery getInstance(){
+        
+        if(discovery == null){
+            discovery = new Discovery();
+        }
+
+        return discovery;
     }
     /**
      * Continuously announces a service given its name and uri
@@ -96,7 +76,7 @@ public class Discovery {
      * @param serviceName the composite service name: <domain:service>
      * @param serviceURI - the uri of the service
      */
-    public void announce(String serviceName, String serviceURI) {
+    public void startAnnounce(String serviceName, String serviceURI) {
         Log.info(String.format("Starting Discovery announcements on: %s for: %s -> %s\n", DISCOVERY_ADDR, serviceName, serviceURI));
 
         var pktBytes = String.format("%s%s%s", serviceName, DELIMITER, serviceURI).getBytes();
@@ -126,7 +106,7 @@ public class Discovery {
      * @return the discovery results as an array
      */
 
-    public void listener() {
+    public void startListener() {
         Log.info(String.format("Starting discovery on multicast group: %s, port: %d\n", DISCOVERY_ADDR.getAddress(), DISCOVERY_ADDR.getPort()));
 
         final int MAX_DATAGRAM_SIZE = 65536;
@@ -214,16 +194,5 @@ public class Discovery {
                 x.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Starts sending service announcements at regular intervals...
-     */
-    public void startAnnounce() {
-        announce(serviceName, serviceURI);
-    }
-
-    public void startListener() {
-        listener();
     }
 }

@@ -40,8 +40,8 @@ public class RESTUsersServer {
 
             Log.info(String.format("%s Server ready @ %s\n", SERVICE, serverURI));
 
-            Discovery discovery = new Discovery(SERVICE, serverURI);
-            discovery.startAnnounce();
+            Discovery discovery = new Discovery();
+            discovery.startAnnounce(SERVICE, serverURI);
 
         } catch (Exception e) {
             Log.severe(e.getMessage());

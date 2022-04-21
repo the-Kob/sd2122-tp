@@ -8,6 +8,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class WriteFileClient {
+    
+    /*
+    
     private static Logger Log = Logger.getLogger((WriteFileClient.class.getName()));
 
     static {
@@ -39,5 +42,10 @@ public class WriteFileClient {
         Log.info("Sending request to server.");
         var result = new RestFilesClient(URI.create(serverUrl)).writeFile(fileId, data, token);
         System.out.println("Result: " + result);
+
     }
+        */
+
+
+
 }
