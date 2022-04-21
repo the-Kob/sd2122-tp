@@ -36,15 +36,11 @@ public class UpdateUserClient {
 
         System.out.println("Sending request to server.");
 
-        Discovery discovery = new Discovery(SERVICE);
-        discovery.startListener();
-
         URI[] uris = new URI[] {null};
-
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(SERVICE);
-        }
-
+        
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(SERVICE);
+		}
         serverUrl = uris[0].toString();
 
         var result = new RestUsersClient(URI.create(serverUrl)).updateUser(userId, oldpwd, u);

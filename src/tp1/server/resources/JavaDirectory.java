@@ -32,14 +32,11 @@ public class JavaDirectory implements Directory {
     public Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
         FileInfo newFile = new FileInfo(userId, filename, userId + "_" + filename, new HashSet<String>() );
 
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
         URI[] uris = new URI[] {null};
 
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(USER_SERVICE);
+		}
 
         String serverUrl = uris[0].toString();
 
@@ -82,14 +79,11 @@ public class JavaDirectory implements Directory {
 
         FileInfo file = files.get(filename);
 
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
         URI[] uris = new URI[] {null};
 
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(USER_SERVICE);
+		}
 
         String serverUrl = uris[0].toString();
 
@@ -116,14 +110,11 @@ public class JavaDirectory implements Directory {
 
         FileInfo file = files.get(filename);
 
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
         URI[] uris = new URI[] {null};
 
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(USER_SERVICE);
+		}
 
         String serverUrl = uris[0].toString();
 
@@ -159,14 +150,11 @@ public class JavaDirectory implements Directory {
 
         FileInfo file = files.get(filename);
 
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
         URI[] uris = new URI[] {null};
 
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(USER_SERVICE);
+		}
 
         String serverUrl = uris[0].toString();
 
@@ -195,14 +183,11 @@ public class JavaDirectory implements Directory {
 
         FileInfo file = files.get(filename);
 
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
-
         URI[] uris = new URI[] {null};
 
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(USER_SERVICE);
+		}
 
         String serverUrl = uris[0].toString();
 
@@ -218,14 +203,12 @@ public class JavaDirectory implements Directory {
 
     @Override
     public Result<List<FileInfo>> lsFile(String userId, String password) {
-        Discovery discovery = new Discovery(USER_SERVICE);
-        discovery.startListener();
 
         URI[] uris = new URI[] {null};
 
-        while(uris[0] == null) {
-            uris = discovery.knownUrisOf(USER_SERVICE);
-        }
+		while(uris[0] == null) {
+			uris = Discovery.getInstance().knownUrisOf(USER_SERVICE);
+		}
 
         String serverUrl = uris[0].toString();
 

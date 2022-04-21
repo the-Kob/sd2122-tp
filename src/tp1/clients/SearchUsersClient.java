@@ -30,13 +30,10 @@ public class SearchUsersClient {
 
 		System.out.println("Sending request to server.");
 
-		Discovery discovery = new Discovery(SERVICE);
-		discovery.startListener();
-
 		URI[] uris = new URI[] {null};
 
 		while(uris[0] == null) {
-			uris = discovery.knownUrisOf(SERVICE);
+			uris = Discovery.getInstance().knownUrisOf(SERVICE);
 		}
 
 		serverUrl = uris[0].toString();
