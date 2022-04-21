@@ -62,10 +62,11 @@ public class Discovery {
     }
 
 
-    public static Discovery getInstance(){
+    synchronized public static Discovery getInstance(){
         
         if(discovery == null){
             discovery = new Discovery();
+            new Thread( discovery::startListener ).start();
         }
 
         return discovery;
