@@ -54,7 +54,7 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
 
     private FileInfo clt_writeFile(String filename, byte[] data, String userId, String password) {
         
-        FileInfo f = new FileInfo(userId, filename,userId + "/" + filename, new HashSet<>());
+        FileInfo f = new FileInfo(userId, filename,"directory/files" + userId + "_" + filename, new HashSet<>());
 
         Response r = target.path(f.getFileURL())
         .queryParam("password", password).request()

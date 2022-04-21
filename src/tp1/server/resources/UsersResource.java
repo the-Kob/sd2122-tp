@@ -20,7 +20,6 @@ public class UsersResource implements RestUsers {
 
 	final Users impl;
 
-
 	public UsersResource() {
 		impl = new JavaUsers();
 	}
