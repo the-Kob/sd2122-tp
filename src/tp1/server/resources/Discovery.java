@@ -83,6 +83,7 @@ public class Discovery {
                 for (;;) {
                     try {
                         Thread.sleep(DISCOVERY_PERIOD);
+                        System.out.println(pkt);
                         ds.send(pkt);
                     } catch (Exception e) {
                         e.printStackTrace();
