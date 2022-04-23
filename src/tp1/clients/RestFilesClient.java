@@ -11,8 +11,10 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import tp1.api.service.rest.RestFiles;
 import tp1.api.service.rest.RestUsers;
+import tp1.api.service.util.Files;
+import tp1.api.service.util.Result;
 
-public class RestFilesClient extends RestClient implements RestFiles {
+public class RestFilesClient extends RestClient implements Files {
     
     final WebTarget target;
 
@@ -23,25 +25,23 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
 
     @Override
-    public void writeFile(String fileId, byte[] data, String token) {
-        super.reTry( () -> {clt_writeFile( fileId, data, token ); return null;});
-        
+    public Result<Void> writeFile(String fileId, byte[] data, String token) {
+        return super.reTry( () -> {clt_writeFile( fileId, data, token ); return null;});   
     }
 
 
     @Override
-    public void deleteFile(String fileId, String token) {
-        super.reTry( () -> {clt_deleteFile( fileId, token ); return null;});
-        
+    public Result<Void> deleteFile(String fileId, String token) {
+        return super.reTry( () -> {clt_deleteFile( fileId, token ); return null;});
     }
 
     @Override
-    public byte[] getFile(String fileId, String token) {
+    public Result<byte[]> getFile(String fileId, String token) {
         return super.reTry( () -> clt_getFile( fileId, token ));
     }
 
 
-    private void clt_writeFile(String fileId, byte[] data, String token) {
+    private Result<Void> clt_writeFile(String fileId, byte[] data, String token) {
 
 		Response r = target.path( fileId ).request()
 				.accept(MediaType.APPLICATION_JSON)
@@ -49,29 +49,33 @@ public class RestFilesClient extends RestClient implements RestFiles {
 
 		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success " + r.getStatus());
-
+            return Result.ok();
 		} else {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
+            Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
+			return Result.error(code);
 		}
     }
 
     //TODO
-    private void clt_deleteFile(String fileId, String token) {
+    private Result<Void> clt_deleteFile(String fileId, String token) {
 		Response r = target.path( fileId ).request()
 				.accept(MediaType.APPLICATION_JSON)
 				.delete();
 
 		if(r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success:");
-
 			System.out.println( "Files : " + fileId + " was deleted.");
+            return Result.ok();
 		} else {
 			System.out.println("Error, HTTP error status: " + r.getStatus());
+            Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
+			return Result.error(code);
 		}
     }
 
     //TODO
-    private byte[] clt_getFile(String fileId, String token) {
+    private Result<byte[]> clt_getFile(String fileId, String token) {
         Response r = target.path(fileId)
         .request()
         .accept(MediaType.APPLICATION_JSON)
@@ -82,8 +86,8 @@ public class RestFilesClient extends RestClient implements RestFiles {
         }
          else {
             System.out.println("Error, HTTP error status: " + r.getStatus());
+            Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
+			return Result.error(code);
         }
-
-        return null;
     }
 }

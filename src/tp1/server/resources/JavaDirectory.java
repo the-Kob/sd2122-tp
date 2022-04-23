@@ -37,32 +37,36 @@ public class JavaDirectory implements Directory {
 
         String serverUrl = uris[0].toString();
 
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
+        Result<User> user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
 
-        // Check if the file already exists
-        if(files.containsKey(filename)) {
-            FileInfo file = files.get(filename);
+        if(user.isOK()){
+            // Check if the file already exists
+            if(files.containsKey(filename)) {
+                FileInfo file = files.get(filename);
 
-            // Check the original owner of the file
-            if(file.getOwner().equals(user.getUserId())) {
-                file = newFile;
+                // Check the original owner of the file
+                if(file.getOwner().equals(user.value().getUserId())) {
+                    file = newFile;
 
-                userFiles.get(userId).add(file);
+                    userFiles.get(userId).add(file);
+                } else {
+                    return Result.error(ErrorCode.BAD_REQUEST);
+                }
             } else {
-                return Result.error(ErrorCode.BAD_REQUEST);
+                files.put(filename, newFile);
+
+                // Check if the user is already "registered"
+                if(!userFiles.containsKey(user.value().getUserId())) {
+                    userFiles.put(user.value().getUserId(), new LinkedList<>());
+                }
+
+                userFiles.get(user.value().getUserId()).add(newFile);
+
+                // Search for the server in which the file is stored
             }
         } else {
-            files.put(filename, newFile);
-
-            // Check if the user is already "registered"
-            if(!userFiles.containsKey(user.getUserId())) {
-                userFiles.put(user.getUserId(), new LinkedList<>());
-            }
-
-            userFiles.get(user.getUserId()).add(newFile);
-
-            // Search for the server in which the file is stored
-        }
+			return Result.error(user.error());
+		}
 
         return Result.ok(newFile);
     }
@@ -84,17 +88,21 @@ public class JavaDirectory implements Directory {
 
         String serverUrl = uris[0].toString();
 
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
+        Result<User> user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
 
-        // Check the owner of the file
-        if(!file.getOwner().equals(user.getUserId())) {
-            return Result.error(ErrorCode.BAD_REQUEST);
+        if(user.isOK()){
+            // Check the owner of the file
+            if(!file.getOwner().equals(user.value().getUserId())) {
+                return Result.error(ErrorCode.BAD_REQUEST);
+            }
+
+            files.remove(filename);
+            userFiles.get(user.value().getUserId()).remove(file);
+
+            return Result.ok();
+        } else{
+            return Result.error(user.error());
         }
-
-        files.remove(filename);
-        userFiles.get(user.getUserId()).remove(file);
-
-        return Result.ok();
 
     }
 
@@ -115,24 +123,32 @@ public class JavaDirectory implements Directory {
 
         String serverUrl = uris[0].toString();
 
-        User owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
+        Result<User> owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
 
-        User user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
+        Result<User> user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
 
-        // Check the owner of the file
-        if(!file.getOwner().equals(owner.getUserId())) {
-            return Result.error(ErrorCode.BAD_REQUEST);
-        }
+        if(owner.isOK()){
+            if(user.isOK()){
+                // Check the owner of the file
+                if(!file.getOwner().equals(owner.value().getUserId())) {
+                    return Result.error(ErrorCode.BAD_REQUEST);
+                }
 
-        // Check if the user is already "registered"
-        if(!userFiles.containsKey(user.getUserId())) {
+                // Check if the user is already "registered"
+                if(!userFiles.containsKey(user.value().getUserId())) {
 
-            // Check if the file hasn't been shared with the user before
-            if(!userFiles.get(user.getUserId()).contains(file)){
-                userFiles.put(user.getUserId(), new LinkedList<>());
-            }
+                    // Check if the file hasn't been shared with the user before
+                    if(!userFiles.get(user.value().getUserId()).contains(file)){
+                        userFiles.put(user.value().getUserId(), new LinkedList<>());
+                    }
 
-            userFiles.get(user.getUserId()).add(file);
+                    userFiles.get(user.value().getUserId()).add(file);
+                }
+            }else{
+                return Result.error(user.error());
+            } 
+        }   else{
+            return Result.error(owner.error());
         }
 
         return Result.ok();
@@ -155,19 +171,26 @@ public class JavaDirectory implements Directory {
 
         String serverUrl = uris[0].toString();
 
-        User owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
-        User user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
+        Result<User> owner = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
+        Result<User> user = new RestUsersClient(URI.create(serverUrl)).searchForUser(userIdShare);
 
-        // Check the owner of the file
-        if(!file.getOwner().equals(owner.getUserId())) {
-            return Result.error(ErrorCode.BAD_REQUEST);
+        if(owner.isOK()){
+            if(user.isOK()){
+                // Check the owner of the file
+                if(!file.getOwner().equals(owner.value().getUserId())) {
+                    return Result.error(ErrorCode.BAD_REQUEST);
+                }
+
+                // Check if the file hasn't been shared with the user before
+                if(userFiles.get(user.value().getUserId()).contains(file)){
+                    userFiles.get(user.value().getUserId()).remove(file);
+                }
+            }else{
+                return Result.error(user.error());
+            }
+        }else{
+            return Result.error(owner.error());
         }
-
-        // Check if the file hasn't been shared with the user before
-        if(userFiles.get(user.getUserId()).contains(file)){
-            userFiles.get(user.getUserId()).remove(file);
-        }
-
         return Result.ok();
     }
 
@@ -188,11 +211,15 @@ public class JavaDirectory implements Directory {
 
         String serverUrl = uris[0].toString();
 
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
+        Result<User> user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
 
+        if(user.isOK()){
         // Check if the user has access to the file
-        if(!userFiles.get(user.getUserId()).contains(file)){
-            return Result.error(ErrorCode.BAD_REQUEST);
+            if(!userFiles.get(user.value().getUserId()).contains(file)){
+                return Result.error(ErrorCode.BAD_REQUEST);
+            }
+        }else{
+            return Result.error(user.error());
         }
 
 
@@ -210,9 +237,13 @@ public class JavaDirectory implements Directory {
 
         String serverUrl = uris[0].toString();
 
-        User user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
+        Result<User> user = new RestUsersClient(URI.create(serverUrl)).getUser(userId, password);
 
-        return Result.ok(userFiles.get(user.getUserId()));
+        if(user.isOK()){
+            return Result.ok(userFiles.get(user.value().getUserId()));
+        }else{
+            return Result.error(user.error());
+        }
     }
 
 }
