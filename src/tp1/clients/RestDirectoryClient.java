@@ -9,6 +9,8 @@ import jakarta.ws.rs.core.Response.Status;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.List;
@@ -120,14 +122,13 @@ public class RestDirectoryClient extends RestClient implements RestDirectory {
     // QUESTION: How do you return the data of the file if the data isn't stored in the object FileInfo
     private byte[] clt_getFile(String filename, String userId, String accUserId, String password) {
         Response r = target.path(userId + "/" + filename)
-                .queryParam("userId", accUserId).queryParam("password", password).request()
-                .accept(MediaType.APPLICATION_JSON)
+                .queryParam("accUserId", accUserId).queryParam("password", password).request()
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .get();
 
         if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
-            System.out.println("Success:");
-            FileInfo f = r.readEntity(FileInfo.class);
-            System.out.println( "File : " + f);
+            System.out.println("Success.");
+            return r.readEntity(new GenericType<byte[]>() {});
         } else {
             System.out.println("Error, HTTP error status: " + r.getStatus());
         }

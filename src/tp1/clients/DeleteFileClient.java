@@ -1,9 +1,11 @@
 package tp1.clients;
 
+import tp1.server.resources.Discovery;
 import util.Debug;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +22,6 @@ public class DeleteFileClient {
 
     public static void main(String[] args) throws IOException {
 
-        /*
         Debug.setLogLevel(Level.FINE, Debug.SD2122);
 
         if( args.length != 2) {
@@ -34,10 +35,19 @@ public class DeleteFileClient {
 
         System.out.println("Sending request to server.");
 
-        //URI stuff
+        URI[] uris = new URI[] {null};
+
+        while(uris[0] == null) {
+            uris = Discovery.getInstance().knownUrisOf(SERVICE);
+        }
+
+        Random r = new Random();
+
+        serverUrl = uris[r.nextInt(uris.length)].toString();
+
 
         Log.info("Sending request to server.");
-        new RestFilesClient(URI.create(serverUrl)).deleteFile(fileId, token);
-        */
+        var result = new RestFilesClient(URI.create(serverUrl)).deleteFile(fileId, token);
+        System.out.println("Result: " + result);
     }
 }
