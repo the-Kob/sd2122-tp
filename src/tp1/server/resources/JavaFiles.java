@@ -41,9 +41,16 @@ public class JavaFiles implements Files{
         }
 
         File myObj = new File(fileId);
-        myObj.delete();
 
-        return Result.ok();
+        if (myObj.exists()) {
+            myObj.delete();
+
+            return Result.ok();
+        } else {
+            System.out.println("Object doesn't exist.");
+
+            return Result.error(Result.ErrorCode.NOT_FOUND);
+        }
     }
 
     @Override

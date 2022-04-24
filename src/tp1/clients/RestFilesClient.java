@@ -52,7 +52,7 @@ public class RestFilesClient extends RestClient implements Files {
 			System.out.println("Success write" + r.getStatus());
             return Result.ok();
 		} else {
-			System.out.println("Error, HTTP error status: " + r.getStatus());
+			System.out.println("Error, HTTP error status: write file files" + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
 		}
@@ -70,7 +70,7 @@ public class RestFilesClient extends RestClient implements Files {
 			System.out.println( "Files : " + fileId + " was deleted.");
             return Result.ok();
 		} else {
-			System.out.println("Error, HTTP error status: " + r.getStatus());
+			System.out.println("Error, HTTP error status: delete file files" + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
 		}

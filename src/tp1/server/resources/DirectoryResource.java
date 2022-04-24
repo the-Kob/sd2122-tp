@@ -51,10 +51,11 @@ public class DirectoryResource implements RestDirectory {
 
     @Override
     public void deleteFile(String filename, String userId, String password) {
-
         var result = impl.deleteFile(filename, userId, password);
-		
-		if(result.error().equals(ErrorCode.BAD_REQUEST)){
+
+		if(result.isOK()) {
+			result.value();
+		} else if(result.error().equals(ErrorCode.BAD_REQUEST)){
 			throw new WebApplicationException( Status.BAD_REQUEST );
 		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
 			throw new WebApplicationException( Status.NOT_FOUND );

@@ -84,22 +84,23 @@ public class JavaDirectory implements Directory {
         String fileId = String.format("%s_%s", userId, filename);
 
         // Check if user exists
-        if(userFiles.containsKey(userId)) {
-            FileInfo file  = searchForFile(userId, filename);
-
-            URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + filename, ""));
-            // Check if file exists
-            if(file != null) {
-                new RestFilesClient(fileURI).deleteFile(fileId, "");
-
-                userFiles.get(userId).remove(file);
-                updateServerMinus(fileURI);
-            } else {
-                //File doesn't exist
-                return Result.error(ErrorCode.NOT_FOUND);
-            }
-        } else {
+        if(!userFiles.containsKey(userId)) {
             // User doesn't exist
+            return Result.error(ErrorCode.NOT_FOUND);
+        }
+
+        FileInfo file  = searchForFile(userId, filename);
+
+        // Check if file exists
+        if(file != null) {
+            URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + filename, ""));
+
+            new RestFilesClient(fileURI).deleteFile(fileId, "");
+
+            userFiles.get(userId).remove(file);
+            updateServerMinus(fileURI);
+        } else {
+            //File doesn't exist
             return Result.error(ErrorCode.NOT_FOUND);
         }
 
@@ -216,12 +217,23 @@ public class JavaDirectory implements Directory {
             return Result.error(user.error());
         }
 
-        if(!userFiles.containsKey(userId)) {
-            // User doesn't have files
-            return Result.error(ErrorCode.NOT_FOUND);
+        List<FileInfo> allFiles = new LinkedList<FileInfo>();
+
+        // Own files
+        if(userFiles.containsKey(userId)) {
+            allFiles.addAll(userFiles.get(userId));
         }
 
-        return Result.ok(userFiles.get(userId));
+        // Shared files
+        for(List<FileInfo> uFiles: userFiles.values()) {
+            for(FileInfo file: uFiles) {
+                if(file.getSharedWith().contains(userId)) {
+                    allFiles.add(file);
+                }
+            }
+        }
+
+        return Result.ok(allFiles);
     }
 
     private FileInfo searchForFile(String userId, String filename) {
