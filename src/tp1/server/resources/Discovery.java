@@ -112,27 +112,25 @@ public class Discovery {
                         ms.receive(pkt);
 
                         var msg = new String(pkt.getData(), 0, pkt.getLength());
-                        //System.out.printf( "FROM %s (%s) : %s\n", pkt.getAddress().getCanonicalHostName(),
-                        //        pkt.getAddress().getHostAddress(), msg);
+
                         var tokens = msg.split(DELIMITER);
                         // tokens[0] = serviceName
                         // tokens[1] = (URI) - String format
 
                         if (tokens.length == 2) {
-                            URI uri = URI.create(tokens[1]);
-                            if(!this.serviceURIs.containsKey(tokens[0])) {
-                                this.serviceURIs.put(tokens[0], new ArrayList<>());
-                                this.serviceURIs.get(tokens[0]).add(uri);
-                                this.serviceTimes.put(tokens[0], System.currentTimeMillis());
-                            } else {
-                                if(!this.serviceURIs.get(tokens[0]).contains(uri)) {
-                                    this.serviceURIs.get(tokens[0]).add(URI.create(tokens[1]));
-                                    this.serviceTimes.put(tokens[0], System.currentTimeMillis());
-                                }
+                            ArrayList<URI> uris = serviceURIs.get(tokens[0]);
+
+                            // Check if there already is a service with URIs
+                            if(uris == null) {
+                                uris = new ArrayList<URI>();
+                                serviceURIs.put(tokens[0], uris);
+                            }
+
+                            // If there already is a service, check if the URI is in the service URIs'
+                            if(!uris.contains(tokens[1])) {
+                                uris.add(URI.create(tokens[1]));
                             }
                         }
-
-                        System.out.println(serviceURIs);
                     } catch (IOException e) {
                         e.printStackTrace();
                         try {

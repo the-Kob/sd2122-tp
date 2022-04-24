@@ -124,7 +124,7 @@ public class JavaUsers  implements Users{
 		return Result.ok(patternedUsers);
     }
 
-	public Result<User> searchForUser(String userId) {
+	public Result<Boolean> doesUserExist(String userId) {
 		if(userId == null) {
 			return Result.error(ErrorCode.BAD_REQUEST);
 		}
@@ -135,7 +135,7 @@ public class JavaUsers  implements Users{
 			return Result.error(ErrorCode.NOT_FOUND);
 		}
 
-		return Result.ok(user);
+		return Result.ok(true);
 	}
 
     private Result<User> retrieveUser(String userId, String password) {

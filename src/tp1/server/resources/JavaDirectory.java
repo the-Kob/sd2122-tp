@@ -42,13 +42,13 @@ public class JavaDirectory implements Directory {
         // Choose a random file URI
         Random r = new Random();
         URI fileURI = filesURIs[r.nextInt(filesURIs.length)];
-        String fileURL = String.format("%s%s/%s_%s", fileURI.toString(), RestFiles.PATH, userId.replace(".", "_"), filename);
+        String fileURL = String.format("%s%s/%s_%s", fileURI.toString(), RestFiles.PATH, userId, filename);
 
         if(!user.isOK()) {
             return Result.error(user.error());
         }
 
-        String fileId = String.format("%s_%s", userId.replace(".", "_"), filename);
+        String fileId = String.format("%s_%s", userId, filename);
         FileInfo file;
 
         // Check if user already exists
@@ -85,7 +85,7 @@ public class JavaDirectory implements Directory {
             return Result.error(user.error());
         }
 
-        String fileId = String.format("%s_%s", userId.replace(".", "_"), filename);
+        String fileId = String.format("%s_%s", userId, filename);
 
         // Check if user exists
         if(userFiles.containsKey(userId)) {
@@ -119,7 +119,7 @@ public class JavaDirectory implements Directory {
             return Result.error(owner.error());
         }
 
-        Result<User> user = new RestUsersClient(userURIs[0]).searchForUser(userIdShare);
+        Result<Boolean> user = new RestUsersClient(userURIs[0]).doesUserExist(userIdShare);
 
         if(!user.isOK()) {
             return Result.error(user.error());
@@ -150,7 +150,7 @@ public class JavaDirectory implements Directory {
             return Result.error(owner.error());
         }
 
-        Result<User> user = new RestUsersClient(userURIs[0]).searchForUser(userIdShare);
+        Result<Boolean> user = new RestUsersClient(userURIs[0]).doesUserExist(userIdShare);
 
         if(!user.isOK()) {
             return Result.error(user.error());
@@ -181,7 +181,7 @@ public class JavaDirectory implements Directory {
             return Result.error(user.error());
         }
 
-        Result<User> owner = new RestUsersClient(userURIs[0]).searchForUser(userId);
+        Result<Boolean> owner = new RestUsersClient(userURIs[0]).doesUserExist(userId);
 
         if(!owner.isOK()) {
             return Result.error(owner.error());
@@ -206,7 +206,7 @@ public class JavaDirectory implements Directory {
             return Result.error(ErrorCode.FORBIDDEN);
         }
 
-        String fileId = String.format("%s_%s", userId.replace(".", "_"), filename);
+        String fileId = String.format("%s_%s", userId, filename);
 
         URI fileURI = files.get(fileId);
 
@@ -257,7 +257,7 @@ public class JavaDirectory implements Directory {
         List<FileInfo> userF = userFiles.get(userId);
 
         for (FileInfo file: userF) {
-            String fileId = String.format("%s_%s", userId.replace(".", "_"), file.getFilename());
+            String fileId = String.format("%s_%s", userId, file.getFilename());
 
             URI fileURI = files.get(fileId);
             new RestFilesClient(fileURI).deleteFile(fileId, "");

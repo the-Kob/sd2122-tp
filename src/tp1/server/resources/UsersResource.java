@@ -141,9 +141,9 @@ public class UsersResource implements RestUsers {
 	}
 
 	@Override
-	public User searchForUser(String userId) {
+	public boolean doesUserExist(String userId) {
 
-		var result = impl.searchForUser(userId);
+		var result = impl.doesUserExist(userId);
 		
 		if(result.isOK())
 			return result.value();

@@ -61,7 +61,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
 
     private Result<FileInfo> clt_writeFile(String filename, byte[] data, String userId, String password) {
 
-        Response r = target.path(String.format("%s.%s", userId, filename))
+        Response r = target.path(String.format("%s_%s", userId, filename))
                 .queryParam("password", password)
                 .request()
                 .accept(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<FileInfo> clt_deleteFile(String filename, String userId, String password) {
-        Response r = target.path(String.format("%s.%s", userId, filename))
+        Response r = target.path(String.format("%s_%s", userId, filename))
                 .queryParam("password", password)
                 .request()
                 .delete();
@@ -93,7 +93,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<Void> clt_shareFile(String filename, String userId, String userIdShare, String password) {
-        Response r = target.path(String.format("%s.%s/share/%s", userId, filename, userIdShare))
+        Response r = target.path(String.format("%s_%s/share/%s", userId, filename, userIdShare))
                 .queryParam("password", password)
                 .request()
                 .post(Entity.entity(String.class, MediaType.APPLICATION_JSON));
@@ -109,7 +109,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<Void> clt_unshareFile(String filename, String userId, String userIdShare, String password) {
-        Response r = target.path(String.format("%s.%s/share/%s", userId, filename, userIdShare))
+        Response r = target.path(String.format("%s_%s/share/%s", userId, filename, userIdShare))
                 .queryParam("password", password)
                 .request()
                 .delete();
@@ -125,7 +125,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<byte[]> clt_getFile(String filename, String userId, String accUserId, String password) {
-        Response r = target.path(String.format("%s.%s", userId, filename))
+        Response r = target.path(String.format("%s_%s", userId, filename))
                 .queryParam("userId", accUserId)
                 .queryParam("password", password)
                 .request()

@@ -95,7 +95,6 @@ public interface RestUsers {
 	List<User> searchUsers(@QueryParam("query") String pattern);
 
 	@GET
-	@Path("searchUser/{userId}") //MUDAR
-	@Produces(MediaType.APPLICATION_JSON)
-	User searchForUser(@PathParam("userId") String userId);
+	@Path("/{userId}")
+	boolean doesUserExist(@PathParam("userId") String userId);
 }

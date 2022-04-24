@@ -68,5 +68,5 @@ public interface Users {
 	 * @param userId
 	 * @return
 	 */
-    Result<User> searchForUser(String userId);
+    Result<Boolean> doesUserExist(String userId);
 }

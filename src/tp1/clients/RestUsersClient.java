@@ -49,12 +49,11 @@ public class RestUsersClient extends RestClient implements Users {
 	}
 
 	@Override
-	public Result<User> searchForUser(String userId) {
-		return super.reTry( () -> clt_searchForUser(userId));
+	public Result<Boolean> doesUserExist(String userId) {
+		return super.reTry( () -> clt_doesUserExist(userId));
 	}
 
 	private Result<String> clt_createUser( User user) {
-		
 		Response r = target.request()
 				.accept(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(user, MediaType.APPLICATION_JSON));
@@ -69,7 +68,6 @@ public class RestUsersClient extends RestClient implements Users {
 	}
 
 	private Result<User> clt_getUser( String userId, String password) {
-
 		Response r = target.path( userId )
 				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
@@ -79,7 +77,7 @@ public class RestUsersClient extends RestClient implements Users {
 			System.out.println("Success:");
 			return Result.ok(r.readEntity(User.class));
 		} else{
-			System.out.println("Error, HTTP error status: " + r.getStatus() );
+			System.out.println("Error, HTTP error status user: " + r.getStatus() );
 			Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
 		}
@@ -87,7 +85,6 @@ public class RestUsersClient extends RestClient implements Users {
 	}
 
 	private Result<User> clt_updateUser(String userId, String password, User user) {
-		
 		Response r = target.path( userId )
 				.queryParam("password", password).request()
 				.accept(MediaType.APPLICATION_JSON)
@@ -138,18 +135,17 @@ public class RestUsersClient extends RestClient implements Users {
 		}
 	}
 
-	private Result<User> clt_searchForUser(String userId) {
+	private Result<Boolean> clt_doesUserExist(String userId) {
 
-		Response r = target.path( "searchUser/" + userId )
+		Response r = target.path( userId )
 				.request()
-				.accept(MediaType.APPLICATION_JSON)
 				.get();
 
 		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success:");
-			return Result.ok(r.readEntity(User.class));
+			return Result.ok(r.readEntity(new GenericType<Boolean>(){ }));
 		} else{
-			System.out.println("Error, HTTP error status: " + r.getStatus() );
+			System.out.println("Error, HTTP error status search user: " + r.getStatus() );
 			Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
 		}
