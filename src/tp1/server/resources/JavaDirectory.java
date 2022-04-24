@@ -260,7 +260,7 @@ public class JavaDirectory implements Directory {
             String fileId = String.format("%s_%s", userId.replace(".", "_"), file.getFilename());
 
             URI fileURI = files.get(fileId);
-            new RestFilesClient(fileURI).deleteFile(file.getOwner() + "_" + file.getFilename(), "");
+            new RestFilesClient(fileURI).deleteFile(fileId, "");
         }
 
         userFiles.remove(userId);
