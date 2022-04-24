@@ -118,7 +118,6 @@ public class RestUsersClient extends RestClient implements Users {
 	}
 	
 	private Result<List<User>> clt_searchUsers(String pattern) {
-
 		Response r = target
 				.queryParam("query", pattern)
 				.request()
@@ -136,7 +135,6 @@ public class RestUsersClient extends RestClient implements Users {
 	}
 
 	private Result<Boolean> clt_doesUserExist(String userId) {
-
 		Response r = target.path( userId )
 				.request()
 				.get();

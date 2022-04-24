@@ -5,6 +5,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.logging.Logger;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.rest.RestFiles;
@@ -21,56 +23,50 @@ public class JavaDirectory implements Directory {
     private static final String FILE_SERVICE = "files";
 
     private Discovery disc;
-    private Map<String, URI> files;
+    private Map<URI, Integer> servers;
     private Map<String, List<FileInfo>> userFiles;
 
     public JavaDirectory(Discovery discovery){
         this.disc = discovery;
         this.disc.startListener();
-        files = new HashMap<String, URI>();
+        servers = new HashMap<URI, Integer>();
         userFiles = new HashMap<String, List<FileInfo>>();
     }
 
     @Override
-    public synchronized Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
+    public Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
         Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
-
-        URI[] filesURIs = disc.knownUrisOf(FILE_SERVICE);
-
-        // Choose a random file URI
-        Random r = new Random();
-        URI fileURI = filesURIs[r.nextInt(filesURIs.length)];
-        String fileURL = String.format("%s%s/%s_%s", fileURI.toString(), RestFiles.PATH, userId, filename);
 
         if(!user.isOK()) {
             return Result.error(user.error());
         }
 
+        URI[] filesURIs = disc.knownUrisOf(FILE_SERVICE);
+
+        URI fileURI = selectServer(filesURIs);
+
+        String fileURL = String.format("%s%s/%s_%s", fileURI.toString(), RestFiles.PATH, userId, filename);
+
         String fileId = String.format("%s_%s", userId, filename);
         FileInfo file;
 
         // Check if user already exists
-        if(userFiles.containsKey(userId)) {
-            file = searchForFile(userId, filename);
-
-            if(file != null) {
-
-                new RestFilesClient(fileURI).writeFile(fileId, data, "");
-
-                return Result.ok(file);
-            }
-        } else {
+        if(!userFiles.containsKey(userId)) {
             userFiles.put(userId, new LinkedList<FileInfo>());
         }
 
         file = new FileInfo(userId, filename, fileURL, new HashSet<String>());
         userFiles.get(userId).add(file);
 
-        if(!files.containsKey(fileId)) {
-            files.put(fileId, fileURI);
+        if(!servers.containsKey(fileURI)) {
+            servers.put(fileURI, 1);
+        } else {
+            updateServerPlus(fileURI);
         }
+
+        new RestFilesClient(fileURI).writeFile(fileId, data, "");
 
         return Result.ok(file);
     }
@@ -91,12 +87,13 @@ public class JavaDirectory implements Directory {
         if(userFiles.containsKey(userId)) {
             FileInfo file  = searchForFile(userId, filename);
 
+            URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + filename, ""));
             // Check if file exists
             if(file != null) {
-                new RestFilesClient(files.get(filename)).deleteFile(fileId, "");
+                new RestFilesClient(fileURI).deleteFile(fileId, "");
 
                 userFiles.get(userId).remove(file);
-                files.remove(filename);
+                updateServerMinus(fileURI);
             } else {
                 //File doesn't exist
                 return Result.error(ErrorCode.NOT_FOUND);
@@ -206,11 +203,7 @@ public class JavaDirectory implements Directory {
             return Result.error(ErrorCode.FORBIDDEN);
         }
 
-        String fileId = String.format("%s_%s", userId, filename);
-
-        URI fileURI = files.get(fileId);
-
-        return new RestFilesClient(fileURI).getFile(fileId, "");
+        throw new WebApplicationException(Response.temporaryRedirect(URI.create(file.getFileURL())).build());
     }
 
     @Override
@@ -259,7 +252,7 @@ public class JavaDirectory implements Directory {
         for (FileInfo file: userF) {
             String fileId = String.format("%s_%s", userId, file.getFilename());
 
-            URI fileURI = files.get(fileId);
+            URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + file.getFilename(), ""));
             new RestFilesClient(fileURI).deleteFile(fileId, "");
         }
 
@@ -276,5 +269,49 @@ public class JavaDirectory implements Directory {
 
         return Result.ok();
     }
+
+    private URI selectServer(URI[] fileURIs) {
+        URI r = null;
+
+        // Encounter the server with less capacity from all the servers available
+        int maxCapacity = Integer.MAX_VALUE;
+
+        for(URI u: fileURIs) {
+            int currCapacity;
+
+            // Set current capacity
+            if(!servers.containsKey(u)) {
+                currCapacity = 0;
+            } else {
+                currCapacity = servers.get(u);
+            }
+
+            // If the capacity of u is lesser than the max capacity, update values
+            if(currCapacity < maxCapacity) {
+                maxCapacity = currCapacity;
+
+                r = u;
+            }
+        }
+
+        return r;
+    }
+
+    private void updateServerPlus(URI fileURI) {
+        int currCapacity = servers.get(fileURI);
+
+        currCapacity++;
+
+        servers.put(fileURI, currCapacity);
+    }
+
+    private void updateServerMinus(URI fileURI) {
+        int currCapacity = servers.get(fileURI);
+
+        currCapacity--;
+
+        servers.put(fileURI, currCapacity);
+    }
+
 
 }

@@ -5,11 +5,14 @@ import java.util.logging.Logger;
 
 import jakarta.inject.Singleton;
 
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response.Status;
 import tp1.api.FileInfo;
 import tp1.api.service.rest.RestDirectory;
 import tp1.api.service.util.Directory;
+import tp1.api.service.util.Result;
 import tp1.api.service.util.Result.ErrorCode;
 
 
@@ -141,4 +144,21 @@ public class DirectoryResource implements RestDirectory {
             throw new WebApplicationException( Status.NOT_IMPLEMENTED );
         }
     }
+
+	@Override
+	public Result<Void> removeUser(String userId, String password) {
+		var result = impl.removeUser(userId, password);
+
+		if(result.error().equals(ErrorCode.BAD_REQUEST)){
+			throw new WebApplicationException( Status.BAD_REQUEST );
+		} else if(result.error().equals(ErrorCode.NOT_FOUND)){
+			throw new WebApplicationException( Status.NOT_FOUND );
+		} else if(result.error().equals(ErrorCode.CONFLICT)){
+			throw new WebApplicationException( Status.CONFLICT );
+		} else if(result.error().equals(ErrorCode.FORBIDDEN)){
+			throw new WebApplicationException( Status.FORBIDDEN );
+		} else {
+			throw new WebApplicationException( Status.NOT_IMPLEMENTED );
+		}
+	}
 }

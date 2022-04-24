@@ -21,7 +21,7 @@ public class RestFilesClient extends RestClient implements Files {
 
     public RestFilesClient(URI serverURI) {
         super(serverURI);
-        target = client.target( serverURI ).path( RestUsers.PATH );
+        target = client.target( serverURI ).path( RestFiles.PATH );
     }
 
 
@@ -43,14 +43,13 @@ public class RestFilesClient extends RestClient implements Files {
 
 
     private Result<Void> clt_writeFile(String fileId, byte[] data, String token) {
-
 		Response r = target.path( fileId )
                 .queryParam("token", token)
                 .request()
 				.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
 		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
-			System.out.println("Success " + r.getStatus());
+			System.out.println("Success write" + r.getStatus());
             return Result.ok();
 		} else {
 			System.out.println("Error, HTTP error status: " + r.getStatus());

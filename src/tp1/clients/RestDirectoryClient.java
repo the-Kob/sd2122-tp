@@ -70,7 +70,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
         if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
             return Result.ok(r.readEntity(FileInfo.class));
         } else {
-            System.out.println("Error, HTTP error status: " + r.getStatus());
+            System.out.println("Error, HTTP error status: writefile " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
         }
@@ -86,7 +86,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
             System.out.println("Success:");
             return Result.ok(r.readEntity(FileInfo.class));
         } else {
-            System.out.println("Error, HTTP error status: " + r.getStatus());
+            System.out.println("Error, HTTP error status: deletefile " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
         }
@@ -102,7 +102,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
             System.out.println("Success:");
             return Result.ok();
         } else {
-            System.out.println("Error, HTTP error status: " + r.getStatus());
+            System.out.println("Error, HTTP error status: share " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
         }
@@ -118,7 +118,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
             System.out.println("Success:");
             return Result.ok();
         } else {
-            System.out.println("Error, HTTP error status: " + r.getStatus());
+            System.out.println("Error, HTTP error status: unshare " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
         }
@@ -152,7 +152,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
         if (r.getStatus() == Status.OK.getStatusCode() && r.hasEntity()) {
             return Result.ok(r.readEntity(new GenericType<List<FileInfo>>() {}));
         } else {
-            System.out.println("Error, HTTP error status: " + r.getStatus());
+            System.out.println("Error, HTTP error status: lsfile " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
         }
@@ -168,7 +168,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
             System.out.println("Success:");
             return Result.ok();
         } else {
-            System.out.println("Error, HTTP error status: " + r.getStatus());
+            System.out.println("Error, HTTP error status: removeUser " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
             return Result.error(code);
         }

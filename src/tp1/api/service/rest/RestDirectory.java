@@ -12,6 +12,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import tp1.api.FileInfo;
+import tp1.api.service.util.Result;
 
 @Path(RestDirectory.PATH)
 public interface RestDirectory {
@@ -145,6 +146,7 @@ public interface RestDirectory {
 	List<FileInfo> lsFile(@PathParam("userId") String userId, 
 			@QueryParam("password") String password);
 
-
-
+	@DELETE
+	@Path("/{userId}")
+	Result<Void> removeUser(@PathParam("userId") String userId, @QueryParam("password") String password);
 }
