@@ -32,7 +32,7 @@ public class JavaDirectory implements Directory {
     }
 
     @Override
-    public Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
+    public synchronized Result<FileInfo> writeFile(String filename, byte[] data, String userId, String password) {
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
         Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
@@ -57,7 +57,7 @@ public class JavaDirectory implements Directory {
 
             if(file != null) {
 
-                var res = new RestFilesClient(fileURI).writeFile(fileId, data, "");
+                new RestFilesClient(fileURI).writeFile(fileId, data, "");
 
                 return Result.ok(file);
             }
@@ -76,7 +76,7 @@ public class JavaDirectory implements Directory {
     }
 
     @Override
-    public Result<Void> deleteFile(String filename, String userId, String password) {
+    public synchronized Result<Void> deleteFile(String filename, String userId, String password) {
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
         Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
@@ -93,7 +93,7 @@ public class JavaDirectory implements Directory {
 
             // Check if file exists
             if(file != null) {
-                var res = new RestFilesClient(files.get(filename)).deleteFile(fileId, "");
+                new RestFilesClient(files.get(filename)).deleteFile(fileId, "");
 
                 userFiles.get(userId).remove(file);
                 files.remove(filename);
@@ -110,7 +110,7 @@ public class JavaDirectory implements Directory {
     }
 
     @Override
-    public Result<Void> shareFile(String filename, String userId, String userIdShare, String password) {
+    public synchronized Result<Void> shareFile(String filename, String userId, String userIdShare, String password) {
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
         Result<User> owner = new RestUsersClient(userURIs[0]).getUser(userId, password);
