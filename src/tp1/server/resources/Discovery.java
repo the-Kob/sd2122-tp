@@ -61,16 +61,6 @@ public class Discovery {
         startListener();
     }
 
-
-    synchronized public static Discovery getInstance(){
-        
-        if(discovery == null){
-            discovery = new Discovery();
-            new Thread( discovery::startListener ).start();
-        }
-
-        return discovery;
-    }
     /**
      * Continuously announces a service given its name and uri
      *

@@ -19,7 +19,7 @@ public class RestDirectoryClient extends RestClient implements Directory {
 
     final WebTarget target;
 
-    RestDirectoryClient(URI serverURI) {
+    public RestDirectoryClient(URI serverURI) {
         super(serverURI);
         target = client.target( serverURI ).path(RestDirectory.PATH);
     }
@@ -54,14 +54,18 @@ public class RestDirectoryClient extends RestClient implements Directory {
         return super.reTry( () -> clt_lsFile( userId, password ));
     }
 
-    private Result<FileInfo> clt_writeFile(String filename, byte[] data, String userId, String password) {
-        
-        FileInfo f = new FileInfo(userId, filename,"directory/files" + userId + "_" + filename, new HashSet<>());
+    @Override
+    public Result<Void> removeUser(String userId, String password) {
+        return super.reTry( () -> clt_removeUser( userId, password ));
+    }
 
-        Response r = target.path(f.getFileURL())
-        .queryParam("password", password).request()
-        .accept(MediaType.APPLICATION_JSON)
-        .post(Entity.entity(f, MediaType.APPLICATION_OCTET_STREAM));
+    private Result<FileInfo> clt_writeFile(String filename, byte[] data, String userId, String password) {
+
+        Response r = target.path(String.format("%s.%s", userId, filename))
+                .queryParam("password", password)
+                .request()
+                .accept(MediaType.APPLICATION_JSON)
+                .post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
         if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
             return Result.ok(r.readEntity(FileInfo.class));
@@ -73,9 +77,9 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<FileInfo> clt_deleteFile(String filename, String userId, String password) {
-        Response r = target.path(userId + "/" + filename)
-                .queryParam("password", password).request()
-                .accept(MediaType.APPLICATION_JSON)
+        Response r = target.path(String.format("%s.%s", userId, filename))
+                .queryParam("password", password)
+                .request()
                 .delete();
 
         if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
@@ -89,10 +93,10 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<Void> clt_shareFile(String filename, String userId, String userIdShare, String password) {
-        Response r = target.path(userId + "/" + filename + "/share/" + userIdShare)
-                .queryParam("password", password).request()
-                .accept(MediaType.APPLICATION_JSON)
-                .post(Entity.json(null));
+        Response r = target.path(String.format("%s.%s/share/%s", userId, filename, userIdShare))
+                .queryParam("password", password)
+                .request()
+                .post(Entity.entity(String.class, MediaType.APPLICATION_JSON));
 
         if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
             System.out.println("Success:");
@@ -105,9 +109,9 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<Void> clt_unshareFile(String filename, String userId, String userIdShare, String password) {
-        Response r = target.path(userId + "/" + filename + "/share/" + userIdShare)
-                .queryParam("password", password).request()
-                .accept(MediaType.APPLICATION_JSON)
+        Response r = target.path(String.format("%s.%s/share/%s", userId, filename, userIdShare))
+                .queryParam("password", password)
+                .request()
                 .delete();
 
         if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
@@ -120,10 +124,11 @@ public class RestDirectoryClient extends RestClient implements Directory {
         }
     }
 
-    // QUESTION: How do you return the data of the file if the data isn't stored in the object FileInfo
     private Result<byte[]> clt_getFile(String filename, String userId, String accUserId, String password) {
-        Response r = target.path(userId + "/" + filename)
-                .queryParam("accUserId", accUserId).queryParam("password", password).request()
+        Response r = target.path(String.format("%s.%s", userId, filename))
+                .queryParam("userId", accUserId)
+                .queryParam("password", password)
+                .request()
                 .accept(MediaType.APPLICATION_OCTET_STREAM)
                 .get();
 
@@ -138,18 +143,34 @@ public class RestDirectoryClient extends RestClient implements Directory {
     }
 
     private Result<List<FileInfo>> clt_lsFile(String userId, String password) {
-        Response r = target.path(userId)
-                .queryParam("password", password).request()
+        Response r = target.path(String.format("%s", userId))
+                .queryParam("password", password)
+                .request()
                 .accept(MediaType.APPLICATION_JSON)
                 .get();
 
         if (r.getStatus() == Status.OK.getStatusCode() && r.hasEntity()) {
-            return Result.ok(r.readEntity(new GenericType<List<FileInfo>>() {
-            }));
+            return Result.ok(r.readEntity(new GenericType<List<FileInfo>>() {}));
         } else {
             System.out.println("Error, HTTP error status: " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
+        }
+    }
+
+    private Result <Void> clt_removeUser(String userId, String password) {
+        Response r = target.path(String.format("%s", userId))
+                .queryParam("password", password)
+                .request()
+                .delete();
+
+        if (r.getStatus() == Status.OK.getStatusCode() && r.hasEntity()) {
+            System.out.println("Success:");
+            return Result.ok();
+        } else {
+            System.out.println("Error, HTTP error status: " + r.getStatus());
+            Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
+            return Result.error(code);
         }
     }
 }

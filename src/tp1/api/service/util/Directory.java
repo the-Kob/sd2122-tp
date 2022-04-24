@@ -110,4 +110,7 @@ public interface Directory {
 	 *         BAD_REQUEST otherwise.
 	 */
 	Result<List<FileInfo>> lsFile(String userId, String password);
+
+
+    Result<Void> removeUser(String userId, String password);
 }

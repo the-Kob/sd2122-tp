@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
+import tp1.server.resources.DirectoryResource;
 import tp1.server.resources.Discovery;
 import tp1.server.resources.UsersResource;
 import tp1.server.util.GenericExceptionMapper;
@@ -30,19 +31,20 @@ public class RESTUsersServer {
             Debug.setLogLevel(Level.INFO, Debug.SD2122);
 
             ResourceConfig config = new ResourceConfig();
-            config.register(UsersResource.class);
-            //config.register(CustomLoggingFilter.class);
-            config.register(GenericExceptionMapper.class);
 
             String ip = InetAddress.getLocalHost().getHostAddress();
             String serverURI = String.format(SERVER_URI_FMT, ip, PORT);
-            JdkHttpServerFactory.createHttpServer(URI.create(serverURI), config);
-
-            Log.info(String.format("%s Server ready @ %s\n", SERVICE, serverURI));
 
             Discovery discovery = new Discovery();
             discovery.startAnnounce(SERVICE, serverURI);
 
+            config.register(new UsersResource(discovery));
+            //config.register(CustomLoggingFilter.class);
+            //config.register(GenericExceptionMapper.class);
+
+            JdkHttpServerFactory.createHttpServer(URI.create(serverURI), config);
+
+            Log.info(String.format("%s Server ready @ %s\n", SERVICE, serverURI));
         } catch (Exception e) {
             Log.severe(e.getMessage());
         }

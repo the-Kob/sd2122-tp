@@ -11,7 +11,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import tp1.server.resources.Discovery;
 import tp1.server.resources.FilesResource;
 import tp1.server.resources.UsersResource;
-import tp1.server.util.GenericExceptionMapper;
+import tp1.server.util.CustomLoggingFilter;
 import util.Debug;
 
 public class RESTFilesServer {
@@ -32,19 +32,20 @@ public class RESTFilesServer {
             Debug.setLogLevel(Level.INFO, Debug.SD2122);
 
             ResourceConfig config = new ResourceConfig();
-            config.register(FilesResource.class);
-            //config.register(CustomLoggingFilter.class);
-            config.register(GenericExceptionMapper.class);
 
             String ip = InetAddress.getLocalHost().getHostAddress();
             String serverURI = String.format(SERVER_URI_FMT, ip, PORT);
-            JdkHttpServerFactory.createHttpServer(URI.create(serverURI), config);
-
-            Log.info(String.format("%s Server ready @ %s\n", SERVICE, serverURI));
 
             Discovery discovery = new Discovery();
             discovery.startAnnounce(SERVICE, serverURI);
 
+            config.register(new FilesResource(discovery));
+            config.register(CustomLoggingFilter.class);
+            //config.register(GenericExceptionMapper.class);
+
+            JdkHttpServerFactory.createHttpServer(URI.create(serverURI), config);
+
+            Log.info(String.format("%s Server ready @ %s\n", SERVICE, serverURI));
         } catch (Exception e) {
             Log.severe(e.getMessage());
         }

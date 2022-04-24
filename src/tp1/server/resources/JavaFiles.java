@@ -12,8 +12,15 @@ import tp1.api.service.util.Result;
 
 public class JavaFiles implements Files{
 
+    public JavaFiles() {}
+
     @Override
     public Result<Void> writeFile(String fileId, byte[] data, String token) {
+        // Check if file is valid
+        if(fileId == null || data == null) {
+            return Result.error(Result.ErrorCode.BAD_REQUEST);
+        }
+
         try {
             File myObj = new File(fileId);
             myObj.createNewFile();
@@ -37,6 +44,11 @@ public class JavaFiles implements Files{
 
     @Override
     public Result<Void> deleteFile(String fileId, String token) {
+        // Check if file is valid
+        if(fileId == null) {
+            return Result.error(Result.ErrorCode.BAD_REQUEST);
+        }
+
         File myObj = new File(fileId);
         myObj.delete();
 
@@ -45,6 +57,11 @@ public class JavaFiles implements Files{
 
     @Override
     public Result<byte[]> getFile(String fileId, String token) {
+        // Check if file is valid
+        if(fileId == null) {
+            return Result.error(Result.ErrorCode.BAD_REQUEST);
+        }
+
         String readFile = "";
         
         try {
@@ -55,13 +72,14 @@ public class JavaFiles implements Files{
               readFile.concat(data);
             }
             myReader.close();
+
+            return Result.ok(readFile.getBytes());
           } catch (FileNotFoundException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
+            return Result.error(Result.ErrorCode.NOT_FOUND);
           }
 
-          return Result.ok(readFile.getBytes());
+
     }
-    
-    
 }

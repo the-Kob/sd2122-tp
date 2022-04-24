@@ -16,10 +16,14 @@ import tp1.api.service.util.Result.ErrorCode;
 @Singleton
 public class DirectoryResource implements RestDirectory {
 
+	private Discovery discovery;
+
     final Directory impl;
 
-    public DirectoryResource(){
-        impl = new JavaDirectory();
+    public DirectoryResource(Discovery discovery){
+        this.discovery = discovery;
+		this.discovery.startListener();
+		impl = new JavaDirectory(this.discovery);
     }
 
     @Override
@@ -103,7 +107,7 @@ public class DirectoryResource implements RestDirectory {
     @Override
     public byte[] getFile(String filename, String userId, String accUserId, String password) {
         var result = impl.getFile(filename, userId, accUserId, password);
-		
+
 		if(result.isOK())
 			return result.value();
 		else if(result.error().equals(ErrorCode.BAD_REQUEST)){

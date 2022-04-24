@@ -6,6 +6,7 @@ import java.net.URI;
 
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
@@ -18,7 +19,7 @@ public class RestFilesClient extends RestClient implements Files {
     
     final WebTarget target;
 
-    RestFilesClient(URI serverURI) {
+    public RestFilesClient(URI serverURI) {
         super(serverURI);
         target = client.target( serverURI ).path( RestUsers.PATH );
     }
@@ -43,9 +44,10 @@ public class RestFilesClient extends RestClient implements Files {
 
     private Result<Void> clt_writeFile(String fileId, byte[] data, String token) {
 
-		Response r = target.path( fileId ).request()
-				.accept(MediaType.APPLICATION_JSON)
-				.post(Entity.entity(Entity.json(null), MediaType.APPLICATION_JSON));
+		Response r = target.path( fileId )
+                .queryParam("token", token)
+                .request()
+				.post(Entity.entity(data, MediaType.APPLICATION_OCTET_STREAM));
 
 		if( r.getStatus() == Status.OK.getStatusCode() && r.hasEntity() ) {
 			System.out.println("Success " + r.getStatus());
@@ -59,8 +61,9 @@ public class RestFilesClient extends RestClient implements Files {
 
     //TODO
     private Result<Void> clt_deleteFile(String fileId, String token) {
-		Response r = target.path( fileId ).request()
-				.accept(MediaType.APPLICATION_JSON)
+		Response r = target.path( fileId )
+                .queryParam("token", token)
+                .request()
 				.delete();
 
 		if(r.getStatus() == Response.Status.OK.getStatusCode() && r.hasEntity() ) {
@@ -77,12 +80,13 @@ public class RestFilesClient extends RestClient implements Files {
     //TODO
     private Result<byte[]> clt_getFile(String fileId, String token) {
         Response r = target.path(fileId)
-        .request()
-        .accept(MediaType.APPLICATION_JSON)
-        .get();
+                .queryParam("token", token)
+                .request()
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .get();
 
         if (r.getStatus() == Status.OK.getStatusCode() && r.hasEntity()) {
-            return null; //TODO
+            return Result.ok(r.readEntity(new GenericType<byte[]>(){ }));
         }
          else {
             System.out.println("Error, HTTP error status: " + r.getStatus());

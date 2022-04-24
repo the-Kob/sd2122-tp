@@ -1,26 +1,31 @@
 package tp1.server.resources;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import tp1.api.User;
+import tp1.api.service.rest.RestDirectory;
+import tp1.api.service.util.Directory;
 import tp1.api.service.util.Result;
 import tp1.api.service.util.Result.ErrorCode;
 import tp1.api.service.util.Users;
+import tp1.clients.RestDirectoryClient;
 
 public class JavaUsers  implements Users{
 
+	private Discovery disc;
     private final Map<String,User> users;
 
-	public JavaUsers(){
+	public JavaUsers(Discovery discovery){
+		this.disc = discovery;
 		users = new HashMap<String, User>();
 	}
 
     @Override
     public Result<String> createUser(User user) {
-
 
 		if(user.getUserId() == null || user.getPassword() == null || user.getFullName() == null ||
 				user.getEmail() == null) {
@@ -28,9 +33,9 @@ public class JavaUsers  implements Users{
 		}
 
 		// Check if userId already exists
-			if( users.containsKey(user.getUserId())) {
-				return Result.error(ErrorCode.CONFLICT);
-			}
+		if( users.containsKey(user.getUserId())) {
+			return Result.error(ErrorCode.CONFLICT);
+		}
 
 		//Add the user to the map of users
 		users.put(user.getUserId(), user);
@@ -48,7 +53,6 @@ public class JavaUsers  implements Users{
         Result<User> retUser = retrieveUser(userId, password);
 
         if(!retUser.isOK()){
-
             return retUser;
         }
 
@@ -75,7 +79,11 @@ public class JavaUsers  implements Users{
 
     @Override
     public Result<User> deleteUser(String userId, String password) {
-        Result<User> retUser = retrieveUser(userId, password);
+        // Remove user's files
+		URI[] directoryURIs = disc.knownUrisOf("directory");
+		new RestDirectoryClient(directoryURIs[0]).removeUser(userId, password);
+
+		Result<User> retUser = retrieveUser(userId, password);
 
         if(!retUser.isOK()){
 
@@ -138,7 +146,7 @@ public class JavaUsers  implements Users{
 		User user = users.get(userId);
 
 		if( user == null ) {
-			//TESTE
+			System.out.println("user doesnt exist");
 			return Result.error(ErrorCode.NOT_FOUND);
 		}
 

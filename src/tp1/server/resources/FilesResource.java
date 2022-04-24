@@ -7,57 +7,75 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import tp1.api.service.rest.RestFiles;
+import tp1.api.service.util.Files;
+import tp1.api.service.util.Result;
 
 public class FilesResource implements RestFiles {
 
-    
+    final Files impl = new JavaFiles();
+
+    public FilesResource(Discovery discovery) {
+        discovery.startListener();
+    }
 
     @Override
     public void writeFile(String fileId, byte[] data, String token) {
-        try {
-            File myObj = new File(fileId);
-            myObj.createNewFile();
-          } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-          }
+        var result = impl.writeFile(fileId, data, token);
 
-        try {
-            FileWriter myWriter = new FileWriter(fileId);
-            myWriter.write(new String(data, StandardCharsets.UTF_8));
-            myWriter.close();
-            System.out.println("Successfully wrote to the file.");
-          } catch (IOException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-          }
+        if (!result.isOK()) {
+            if (result.error().equals(Result.ErrorCode.BAD_REQUEST)) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            } else if (result.error().equals(Result.ErrorCode.NOT_FOUND)) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            } else if (result.error().equals(Result.ErrorCode.CONFLICT)) {
+                throw new WebApplicationException(Response.Status.CONFLICT);
+            } else if (result.error().equals(Result.ErrorCode.FORBIDDEN)) {
+                throw new WebApplicationException(Response.Status.FORBIDDEN);
+            } else {
+                throw new WebApplicationException(Response.Status.NOT_IMPLEMENTED);
+            }
+        }
     }
 
     @Override
     public void deleteFile(String fileId, String token) {
-        File myObj = new File(fileId);
-        myObj.delete();
+        var result = impl.deleteFile(fileId, token);
+
+        if (!result.isOK()) {
+            if (result.error().equals(Result.ErrorCode.BAD_REQUEST)) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            } else if (result.error().equals(Result.ErrorCode.NOT_FOUND)) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            } else if (result.error().equals(Result.ErrorCode.CONFLICT)) {
+                throw new WebApplicationException(Response.Status.CONFLICT);
+            } else if (result.error().equals(Result.ErrorCode.FORBIDDEN)) {
+                throw new WebApplicationException(Response.Status.FORBIDDEN);
+            } else {
+                throw new WebApplicationException(Response.Status.NOT_IMPLEMENTED);
+            }
+        }
     }
 
     @Override
     public byte[] getFile(String fileId, String token) {
-        String readFile = "";
-        
-        try {
-            File myObj = new File(fileId);
-            Scanner myReader = new Scanner(myObj);
-            while (myReader.hasNextLine()) {
-              String data = myReader.nextLine();
-              readFile.concat(data);
-            }
-            myReader.close();
-          } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
-            e.printStackTrace();
-          }
+        var result = impl.getFile(fileId, token);
 
-          return readFile.getBytes();
+        if (result.isOK()) {
+            return result.value();
+        }else if (result.error().equals(Result.ErrorCode.BAD_REQUEST)) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        } else if (result.error().equals(Result.ErrorCode.NOT_FOUND)) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        } else if (result.error().equals(Result.ErrorCode.CONFLICT)) {
+            throw new WebApplicationException(Response.Status.CONFLICT);
+        } else if (result.error().equals(Result.ErrorCode.FORBIDDEN)) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        } else {
+            throw new WebApplicationException(Response.Status.NOT_IMPLEMENTED);
+        }
     }
     
 }

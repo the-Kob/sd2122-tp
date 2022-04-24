@@ -18,10 +18,14 @@ public class UsersResource implements RestUsers {
 
 	private static Logger Log = Logger.getLogger(UsersResource.class.getName());
 
+	private Discovery discovery;
+
 	final Users impl;
 
-	public UsersResource() {
-		impl = new JavaUsers();
+	public UsersResource(Discovery discovery) {
+		this.discovery = discovery;
+		this.discovery.startListener();
+		impl = new JavaUsers(this.discovery);
 	}
 
 	@Override
