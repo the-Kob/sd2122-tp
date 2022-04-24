@@ -77,7 +77,6 @@ public class RestFilesClient extends RestClient implements Files {
 		}
     }
 
-    //TODO
     private Result<byte[]> clt_getFile(String fileId, String token) {
         Response r = target.path(fileId)
                 .queryParam("token", token)
@@ -89,7 +88,7 @@ public class RestFilesClient extends RestClient implements Files {
             return Result.ok(r.readEntity(new GenericType<byte[]>(){ }));
         }
          else {
-            System.out.println("Error, HTTP error status bruh bruh: " + r.getStatus());
+            System.out.println("Error, HTTP error status: " + r.getStatus());
             Result.ErrorCode code = Result.ErrorCode.valueOf(Response.Status.fromStatusCode(r.getStatus()).name());
 			return Result.error(code);
         }
