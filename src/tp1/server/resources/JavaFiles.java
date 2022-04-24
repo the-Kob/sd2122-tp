@@ -34,12 +34,15 @@ public class JavaFiles implements Files{
             myWriter.write(new String(data, StandardCharsets.UTF_8));
             myWriter.close();
             System.out.println("Successfully wrote to the file.");
+
+            return Result.ok();
           } catch (IOException e) {
             System.out.println("An error occurred.");
             e.printStackTrace();
+            return Result.error(Result.ErrorCode.FORBIDDEN);
           }
 
-        return Result.ok();
+
     }
 
     @Override
