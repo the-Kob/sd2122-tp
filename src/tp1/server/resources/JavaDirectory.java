@@ -3,6 +3,7 @@ package tp1.server.resources;
 import java.io.File;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -29,8 +30,8 @@ public class JavaDirectory implements Directory {
     public JavaDirectory(Discovery discovery){
         this.disc = discovery;
         this.disc.startListener();
-        servers = new HashMap<URI, Integer>();
-        userFiles = new HashMap<String, List<FileInfo>>();
+        servers = new ConcurrentHashMap<URI, Integer>();
+        userFiles = new ConcurrentHashMap<String, List<FileInfo>>();
     }
 
     @Override

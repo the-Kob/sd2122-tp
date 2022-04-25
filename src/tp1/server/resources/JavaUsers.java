@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import tp1.api.User;
 import tp1.api.service.rest.RestDirectory;
@@ -21,7 +22,7 @@ public class JavaUsers  implements Users{
 
 	public JavaUsers(Discovery discovery){
 		this.disc = discovery;
-		users = new HashMap<String, User>();
+		users = new ConcurrentHashMap<String, User>();
 	}
 
     @Override
