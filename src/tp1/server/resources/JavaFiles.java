@@ -3,11 +3,14 @@ package tp1.server.resources;
 import java.io.*;
 
 import java.nio.file.Paths;
+import java.util.concurrent.locks.ReentrantLock;
 
 import tp1.api.service.util.Files;
 import tp1.api.service.util.Result;
 
 public class JavaFiles implements Files{
+
+    private static ReentrantLock lock = new ReentrantLock();
 
     public JavaFiles() {}
 
@@ -40,17 +43,23 @@ public class JavaFiles implements Files{
             return Result.error(Result.ErrorCode.BAD_REQUEST);
         }
 
+        //lock.lock();
+
         File myObj = new File(fileId);
 
         if (myObj.exists()) {
             myObj.delete();
 
-            return Result.ok();
+            //lock.unlock();
         } else {
+            //lock.unlock();
+
             System.out.println("Object doesn't exist.");
 
             return Result.error(Result.ErrorCode.NOT_FOUND);
         }
+
+        return Result.ok();
     }
 
     @Override

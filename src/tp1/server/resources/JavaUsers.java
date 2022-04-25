@@ -15,34 +15,34 @@ import tp1.api.service.util.Result.ErrorCode;
 import tp1.api.service.util.Users;
 import tp1.clients.RestDirectoryClient;
 
-public class JavaUsers  implements Users{
+public class JavaUsers implements Users {
 
-	private Discovery disc;
-    private final Map<String,User> users;
+    private Discovery disc;
+    private final Map<String, User> users;
 
-	public JavaUsers(Discovery discovery){
-		this.disc = discovery;
-		users = new ConcurrentHashMap<String, User>();
-	}
+    public JavaUsers(Discovery discovery) {
+        this.disc = discovery;
+        users = new ConcurrentHashMap<String, User>();
+    }
 
     @Override
     public Result<String> createUser(User user) {
 
-		if(user.getUserId() == null || user.getPassword() == null || user.getFullName() == null ||
-				user.getEmail() == null) {
+        if (user.getUserId() == null || user.getPassword() == null || user.getFullName() == null ||
+                user.getEmail() == null) {
             return Result.error(ErrorCode.BAD_REQUEST);
-		}
-		synchronized (users) {
-			// Check if userId already exists
-			if( users.containsKey(user.getUserId())) {
-				return Result.error(ErrorCode.CONFLICT);
-			}
+        }
 
-			//Add the user to the map of users
-			users.put(user.getUserId(), user);
-		}
+        // Check if userId already exists
+        if (users.containsKey(user.getUserId())) {
+            return Result.error(ErrorCode.CONFLICT);
+        }
 
-		return Result.ok(user.getUserId());
+        //Add the user to the map of users
+        users.put(user.getUserId(), user);
+
+
+        return Result.ok(user.getUserId());
     }
 
     @Override
@@ -55,122 +55,122 @@ public class JavaUsers  implements Users{
 
         Result<User> retUser = retrieveUser(userId, password);
 
-        if(!retUser.isOK()){
+        if (!retUser.isOK()) {
             return retUser;
         }
 
-		User mainUser = retrieveUser(userId, password).value();
+        User mainUser = retrieveUser(userId, password).value();
 
-		String newPwd = user.getPassword();
-		String newFullName = user.getFullName();
-		String newEmail = user.getEmail();
+        String newPwd = user.getPassword();
+        String newFullName = user.getFullName();
+        String newEmail = user.getEmail();
 
-		if(newPwd != null) {
-			mainUser.setPassword(newPwd);
-		}
+        if (newPwd != null) {
+            mainUser.setPassword(newPwd);
+        }
 
-		if(newFullName != null) {
-			mainUser.setFullName(newFullName);
-		}
+        if (newFullName != null) {
+            mainUser.setFullName(newFullName);
+        }
 
-		if(newEmail != null) {
-			mainUser.setEmail(newEmail);
-		}
+        if (newEmail != null) {
+            mainUser.setEmail(newEmail);
+        }
 
-		return Result.ok(mainUser);
+        return Result.ok(mainUser);
     }
 
     @Override
     public Result<User> deleteUser(String userId, String password) {
         // Remove user's files
-		URI[] directoryURIs = disc.knownUrisOf("directory");
-		new RestDirectoryClient(directoryURIs[0]).removeUser(userId, password);
+        URI[] directoryURIs = disc.knownUrisOf("directory");
+        new RestDirectoryClient(directoryURIs[0]).removeUser(userId, password);
 
-		Result<User> retUser = retrieveUser(userId, password);
+        Result<User> retUser = retrieveUser(userId, password);
 
-        if(!retUser.isOK()){
+        if (!retUser.isOK()) {
             return retUser;
         }
 
-		User mainUser = retrieveUser(userId, password).value();
+        User mainUser = retrieveUser(userId, password).value();
 
-		synchronized (users) {
-			users.remove(mainUser.getUserId());
-		}
 
-		return Result.ok(mainUser);
+        users.remove(mainUser.getUserId());
+
+
+        return Result.ok(mainUser);
     }
 
     @Override
     public Result<List<User>> searchUsers(String pattern) {
-        
-		if(pattern == null) {
-			return Result.ok( new ArrayList<User>(users.values()));
-		}
 
- 		synchronized (users) {
-			if(users.isEmpty()) {
-				return Result.ok( new ArrayList<User>());
-			}
-		}
+        if (pattern == null) {
+            return Result.ok(new ArrayList<User>(users.values()));
+        }
 
-		List<User> patternedUsers = new ArrayList<>();
 
-		synchronized (users) {
-			for(Map.Entry<String, User> entry : users.entrySet()) {
-				User user = entry.getValue();
+        if (users.isEmpty()) {
+            return Result.ok(new ArrayList<User>());
+        }
 
-				String fullNameCaps = user.getFullName().toUpperCase();
-				String patternToUpper = pattern.toUpperCase();
 
-				if(fullNameCaps.contains(patternToUpper)) {
-					patternedUsers.add(user);
-				}
-			}
-		}
+        List<User> patternedUsers = new ArrayList<>();
 
-		return Result.ok(patternedUsers);
+
+        for (Map.Entry<String, User> entry : users.entrySet()) {
+            User user = entry.getValue();
+
+            String fullNameCaps = user.getFullName().toUpperCase();
+            String patternToUpper = pattern.toUpperCase();
+
+            if (fullNameCaps.contains(patternToUpper)) {
+                patternedUsers.add(user);
+            }
+        }
+
+
+        return Result.ok(patternedUsers);
     }
 
-	public Result<Boolean> doesUserExist(String userId) {
-		if(userId == null) {
-			return Result.error(ErrorCode.BAD_REQUEST);
-		}
+    public Result<Boolean> doesUserExist(String userId) {
+        if (userId == null) {
+            return Result.error(ErrorCode.BAD_REQUEST);
+        }
 
-		synchronized (users)  {
-			User user = users.get(userId);
 
-			if( user == null ) {
-				return Result.error(ErrorCode.NOT_FOUND);
-			}
-		}
+        User user = users.get(userId);
 
-		return Result.ok(true);
-	}
+        if (user == null) {
+            return Result.error(ErrorCode.NOT_FOUND);
+        }
+
+
+        return Result.ok(true);
+    }
 
     private Result<User> retrieveUser(String userId, String password) {
-		if(userId == null) {
-			return Result.error(ErrorCode.BAD_REQUEST);
-		}
+        if (userId == null) {
+            return Result.error(ErrorCode.BAD_REQUEST);
+        }
 
-		synchronized (users) {
-			User user = users.get(userId);
 
-			if( user == null ) {
-				System.out.println("user doesnt exist");
-				return Result.error(ErrorCode.NOT_FOUND);
-			}
+        User user = users.get(userId);
 
-			if(password == null) {
-				return Result.error(ErrorCode.FORBIDDEN);
+        if (user == null) {
+            System.out.println("user doesnt exist");
+            return Result.error(ErrorCode.NOT_FOUND);
+        }
 
-			}
+        if (password == null) {
+            return Result.error(ErrorCode.FORBIDDEN);
 
-			if( !user.getPassword().equals( password)) {
-				return Result.error(ErrorCode.FORBIDDEN);
-			}
+        }
 
-			return Result.ok(user);
-		}
-	}
+        if (!user.getPassword().equals(password)) {
+            return Result.error(ErrorCode.FORBIDDEN);
+        }
+
+        return Result.ok(user);
+    }
+
 }
