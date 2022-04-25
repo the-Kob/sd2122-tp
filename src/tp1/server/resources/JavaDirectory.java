@@ -10,6 +10,7 @@ import tp1.api.FileInfo;
 import tp1.api.User;
 import tp1.api.service.rest.RestFiles;
 import tp1.api.service.util.Directory;
+import tp1.api.service.util.Files;
 import tp1.api.service.util.Result;
 import tp1.api.service.util.Users;
 import tp1.api.service.util.Result.ErrorCode;
@@ -71,7 +72,13 @@ public class JavaDirectory implements Directory {
             if(file != null) {
                 fileURI = URI.create(file.getFileURL().replace("/files/" + fileId, ""));
 
-                new RestFilesClient(fileURI).writeFile(fileId, data, "");
+                Result<Files> f1 = ClientFactory.getFilesClient(fileURI);
+
+                if(f1.isOK()) {
+                    f1.value().writeFile(fileId, data, "");
+                } else{
+                    return Result.error(dir.error());
+                }
 
                 servers.put(fileURI, servers.get(fileURI) + 1);
 
@@ -89,9 +96,13 @@ public class JavaDirectory implements Directory {
                 servers.put(fileURI, servers.get(fileURI) + 1);
             }
 
+        Result<Files> f2 = ClientFactory.getFilesClient(fileURI);
 
-        new RestFilesClient(fileURI).writeFile(fileId, data, "");
-
+        if(f2.isOK()) {
+            f2.value().writeFile(fileId, data, "");
+        } else{
+            return Result.error(dir.error());
+        }
 
         return Result.ok(file);
     }
@@ -134,7 +145,13 @@ public class JavaDirectory implements Directory {
         if (file != null) {
             URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + filename, ""));
 
-            new RestFilesClient(fileURI).deleteFile(fileId, "");
+            Result<Files> f = ClientFactory.getFilesClient(fileURI);
+
+            if(f.isOK()) {
+                f.value().deleteFile(fileId, "");
+            } else{
+                return Result.error(dir.error());
+            }
 
             userFiles.get(userId).remove(file);
 
@@ -152,21 +169,29 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
+        Result<Users> dir1 = ClientFactory.getUsersClient(userURIs[0]);
 
         Result<User> owner = null;
 
-        if(dir.isOK()) {
-            owner = dir.value().getUser(userId, password);
+        if(dir1.isOK()) {
+            owner = dir1.value().getUser(userId, password);
         } else{
-            return Result.error(dir.error());
+            return Result.error(dir1.error());
         }
 
         if (!owner.isOK()) {
             return Result.error(owner.error());
         }
 
-        Result<Boolean> user = new RestUsersClient(userURIs[0]).doesUserExist(userIdShare);
+        Result<Users> dir2 = ClientFactory.getUsersClient(userURIs[0]);
+
+        Result<Boolean> user = null;
+
+        if(dir2.isOK()) {
+            user = dir2.value().doesUserExist(userIdShare);
+        } else{
+            return Result.error(dir2.error());
+        }
 
         if (!user.isOK()) {
             return Result.error(user.error());
@@ -193,21 +218,28 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
+        Result<Users> dir1 = ClientFactory.getUsersClient(userURIs[0]);
 
         Result<User> owner = null;
 
-        if(dir.isOK()) {
-            owner = dir.value().getUser(userId, password);
+        if(dir1.isOK()) {
+            owner = dir1.value().getUser(userId, password);
         } else{
-            return Result.error(dir.error());
+            return Result.error(dir1.error());
         }
         if (!owner.isOK()) {
             return Result.error(owner.error());
         }
 
-        Result<Boolean> user = new RestUsersClient(userURIs[0]).doesUserExist(userIdShare);
+        Result<Users> dir2 = ClientFactory.getUsersClient(userURIs[0]);
 
+        Result<Boolean> user = null;
+
+        if(dir2.isOK()) {
+            user = dir2.value().doesUserExist(userIdShare);
+        } else{
+            return Result.error(dir2.error());
+        }
         if (!user.isOK()) {
             return Result.error(user.error());
         }
@@ -233,21 +265,29 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
+        Result<Users> dir1 = ClientFactory.getUsersClient(userURIs[0]);
 
         Result<User> user = null;
 
-        if(dir.isOK()) {
-            user = dir.value().getUser(userId, password);
+        if(dir1.isOK()) {
+            user = dir1.value().getUser(userId, password);
         } else{
-            return Result.error(dir.error());
+            return Result.error(dir1.error());
         }
 
         if (!user.isOK()) {
             return Result.error(user.error());
         }
 
-        Result<Boolean> owner = new RestUsersClient(userURIs[0]).doesUserExist(userId);
+        Result<Users> dir2 = ClientFactory.getUsersClient(userURIs[0]);
+
+        Result<Boolean> owner = null;
+
+        if(dir2.isOK()) {
+            owner = dir2.value().doesUserExist(userId);
+        } else{
+            return Result.error(dir2.error());
+        }
 
         if (!owner.isOK()) {
             return Result.error(owner.error());
@@ -355,7 +395,14 @@ public class JavaDirectory implements Directory {
             String fileId = String.format("%s_%s", userId, file.getFilename());
 
             URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + file.getFilename(), ""));
-            new RestFilesClient(fileURI).deleteFile(fileId, "");
+
+            Result<Files> f = ClientFactory.getFilesClient(fileURI);
+
+            if(f.isOK()) {
+                f.value().deleteFile(fileId, "");
+            } else{
+                return Result.error(dir.error());
+            }
         }
 
         userFiles.remove(userId);

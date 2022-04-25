@@ -40,6 +40,7 @@ public class ClientFactory {
     public static Result<Files> getFilesClient(URI serverURI) {
         try {
             var s = serverURI.toString();
+
             if (s.endsWith("rest")) {
                 return Result.ok(new RestFilesClient(serverURI));
             } else {
