@@ -41,7 +41,7 @@ public class SOAPDirectoryServer {
         discovery.startAnnounce(SERVICE, serverURI);
 		
         //ALTERAR PARA CLASSE SOAP RESOURCE
-        Endpoint.publish(serverURI.replace(ip, "0.0.0.0"), new DirectoryWebService(discovery));
+        Endpoint.publish(serverURI, new DirectoryWebService(discovery));
     }
 
     
