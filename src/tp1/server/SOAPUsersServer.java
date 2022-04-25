@@ -41,6 +41,6 @@ public class SOAPUsersServer {
         discovery.startAnnounce(SERVICE, serverURI);
 		
         //ALTERAR PARA CLASSE SOAP RESOURCE
-        Endpoint.publish(serverURI.replace(ip, "0.0.0.0"), new UsersWebService(discovery));
+        Endpoint.publish(serverURI, new UsersWebService(discovery));
     }
 }
