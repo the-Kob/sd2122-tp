@@ -88,6 +88,8 @@ public class JavaUsers implements Users {
 
         if(dir.isOK()) {
             dir.value().removeUser(userId, password);
+        } else{
+            return Result.error(dir.error());
         }
 
         Result<User> retUser = retrieveUser(userId, password);

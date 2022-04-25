@@ -11,8 +11,10 @@ import tp1.api.User;
 import tp1.api.service.rest.RestFiles;
 import tp1.api.service.util.Directory;
 import tp1.api.service.util.Result;
+import tp1.api.service.util.Users;
 import tp1.api.service.util.Result.ErrorCode;
 import tp1.clients.RestUsersClient;
+import tp1.clients.ClientFactory;
 import tp1.clients.RestFilesClient;
 
 public class JavaDirectory implements Directory {
@@ -36,7 +38,15 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
+
+        Result<User> user = null;
+
+        if(dir.isOK()) {
+            user = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
 
         if (!user.isOK()) {
             return Result.error(user.error());
@@ -91,8 +101,15 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
 
+        Result<User> user = null;
+
+        if(dir.isOK()) {
+            user = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
         if (!user.isOK()) {
             return Result.error(user.error());
         }
@@ -135,7 +152,15 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> owner = new RestUsersClient(userURIs[0]).getUser(userId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
+
+        Result<User> owner = null;
+
+        if(dir.isOK()) {
+            owner = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
 
         if (!owner.isOK()) {
             return Result.error(owner.error());
@@ -168,8 +193,15 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> owner = new RestUsersClient(userURIs[0]).getUser(userId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
 
+        Result<User> owner = null;
+
+        if(dir.isOK()) {
+            owner = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
         if (!owner.isOK()) {
             return Result.error(owner.error());
         }
@@ -201,7 +233,15 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> user = new RestUsersClient(userURIs[0]).getUser(accUserId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
+
+        Result<User> user = null;
+
+        if(dir.isOK()) {
+            user = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
 
         if (!user.isOK()) {
             return Result.error(user.error());
@@ -241,8 +281,15 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
 
+        Result<User> user = null;
+
+        if(dir.isOK()) {
+            user = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
         if (!user.isOK()) {
             return Result.error(user.error());
         }
@@ -286,8 +333,16 @@ public class JavaDirectory implements Directory {
 
         URI[] userURIs = disc.knownUrisOf(USER_SERVICE);
 
-        Result<User> user = new RestUsersClient(userURIs[0]).getUser(userId, password);
+        Result<Users> dir = ClientFactory.getUsersClient(userURIs[0]);
 
+        Result<User> user = null;
+
+        if(dir.isOK()) {
+            user = dir.value().getUser(userId, password);
+        } else{
+            return Result.error(dir.error());
+        }
+        
         if (!user.isOK()) {
             return Result.error(user.error());
         }
