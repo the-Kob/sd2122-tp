@@ -10,6 +10,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import jakarta.xml.ws.Endpoint;
 import tp1.server.resources.Discovery;
+import tp1.server.resources.FilesWebService;
 import util.Debug;
 
 public class SOAPFilesServer {
@@ -40,6 +41,6 @@ public class SOAPFilesServer {
         discovery.startAnnounce(SERVICE, serverURI);
 		
         //ALTERAR PARA CLASSE SOAP RESOURCE
-        Endpoint.publish(serverURI.replace(ip, "0.0.0.0"), new SoapFilesResource());
+        Endpoint.publish(serverURI.replace(ip, "0.0.0.0"), new FilesWebService(discovery));
     }
 }

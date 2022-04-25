@@ -9,6 +9,7 @@ import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import jakarta.xml.ws.Endpoint;
+import tp1.server.resources.DirectoryWebService;
 import tp1.server.resources.Discovery;
 import util.Debug;
 
@@ -40,7 +41,7 @@ public class SOAPDirectoryServer {
         discovery.startAnnounce(SERVICE, serverURI);
 		
         //ALTERAR PARA CLASSE SOAP RESOURCE
-        Endpoint.publish(serverURI.replace(ip, "0.0.0.0"), new SoapDiscoveryResource());
+        Endpoint.publish(serverURI.replace(ip, "0.0.0.0"), new DirectoryWebService(discovery));
     }
 
     
