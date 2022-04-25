@@ -113,4 +113,13 @@ public class SoapDirectoryClient extends SoapClient implements Directory {
         }
     }
 
+    private Result<Void> clt_removeUser(String userId, String password) {
+        try {
+            directory.removeUser(userId, password);
+            return Result.ok();
+        } catch(DirectoryException e) {
+            return Result.error(Result.ErrorCode.valueOf(e.getMessage()));
+        }
+    }
+
 }

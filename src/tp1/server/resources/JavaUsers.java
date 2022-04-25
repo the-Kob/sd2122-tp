@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import tp1.api.User;
+import tp1.api.service.util.Directory;
 import tp1.api.service.util.Result;
 import tp1.api.service.util.Result.ErrorCode;
 import tp1.api.service.util.Users;
@@ -82,7 +83,12 @@ public class JavaUsers implements Users {
     public Result<User> deleteUser(String userId, String password) {
         // Remove user's files
         URI[] directoryURIs = disc.knownUrisOf("directory");
-        ClientFactory.getDirectoryClient(directoryURIs[0]).removeUser(userId, password);
+
+        Result<Directory> dir = ClientFactory.getDirectoryClient(directoryURIs[0]);
+
+        if(dir.isOK()) {
+            dir.value().removeUser(userId, password);
+        }
 
         Result<User> retUser = retrieveUser(userId, password);
 
