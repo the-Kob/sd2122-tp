@@ -64,9 +64,10 @@ public interface Users {
 
 
 	/**
-	 * Search for a unique user
-	 * @param userId
-	 * @return
-	 */
+     * Search for a unique user
+     *
+     * @param userId
+     * @return
+     */
     Result<Boolean> doesUserExist(String userId);
 }

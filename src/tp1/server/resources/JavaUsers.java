@@ -2,17 +2,15 @@ package tp1.server.resources;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import tp1.api.User;
-import tp1.api.service.rest.RestDirectory;
-import tp1.api.service.util.Directory;
 import tp1.api.service.util.Result;
 import tp1.api.service.util.Result.ErrorCode;
 import tp1.api.service.util.Users;
+import tp1.clients.ClientFactory;
 import tp1.clients.RestDirectoryClient;
 
 public class JavaUsers implements Users {
@@ -84,7 +82,7 @@ public class JavaUsers implements Users {
     public Result<User> deleteUser(String userId, String password) {
         // Remove user's files
         URI[] directoryURIs = disc.knownUrisOf("directory");
-        new RestDirectoryClient(directoryURIs[0]).removeUser(userId, password);
+        ClientFactory.getDirectoryClient(directoryURIs[0]).removeUser(userId, password);
 
         Result<User> retUser = retrieveUser(userId, password);
 
