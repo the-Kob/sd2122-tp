@@ -52,18 +52,22 @@ public class JavaDirectory implements Directory {
         String fileId = String.format("%s_%s", userId, filename);
         FileInfo file;
 
-        // Check if user already exists
-        if(!userFiles.containsKey(userId)) {
-            userFiles.put(userId, new LinkedList<FileInfo>());
+        synchronized (userFiles) {
+            // Check if user already exists
+            if (!userFiles.containsKey(userId)) {
+                userFiles.put(userId, new LinkedList<FileInfo>());
+            }
+
+            file = new FileInfo(userId, filename, fileURL, new HashSet<String>());
+            userFiles.get(userId).add(file);
         }
 
-        file = new FileInfo(userId, filename, fileURL, new HashSet<String>());
-        userFiles.get(userId).add(file);
-
-        if(!servers.containsKey(fileURI)) {
-            servers.put(fileURI, 1);
-        } else {
-            updateServerPlus(fileURI);
+        synchronized (servers) {
+            if (!servers.containsKey(fileURI)) {
+                servers.put(fileURI, 1);
+            } else {
+                updateServerPlus(fileURI);
+            }
         }
 
         new RestFilesClient(fileURI).writeFile(fileId, data, "");
@@ -83,10 +87,12 @@ public class JavaDirectory implements Directory {
 
         String fileId = String.format("%s_%s", userId, filename);
 
-        // Check if user exists
-        if(!userFiles.containsKey(userId)) {
-            // User doesn't exist
-            return Result.error(ErrorCode.NOT_FOUND);
+        synchronized (userFiles) {
+            // Check if user exists
+            if(!userFiles.containsKey(userId)) {
+                // User doesn't exist
+                return Result.error(ErrorCode.NOT_FOUND);
+            }
         }
 
         FileInfo file  = searchForFile(userId, filename);
@@ -97,7 +103,10 @@ public class JavaDirectory implements Directory {
 
             new RestFilesClient(fileURI).deleteFile(fileId, "");
 
-            userFiles.get(userId).remove(file);
+            synchronized (userFiles) {
+                userFiles.get(userId).remove(file);
+            }
+
             updateServerMinus(fileURI);
         } else {
             //File doesn't exist
@@ -185,10 +194,12 @@ public class JavaDirectory implements Directory {
             return Result.error(owner.error());
         }
 
-        if(!userFiles.containsKey(userId)) {
-            // Owner doesn't have files
-            System.out.println("owner doesnt have files");
-            return Result.error(ErrorCode.NOT_FOUND);
+        synchronized (userFiles) {
+            if(!userFiles.containsKey(userId)) {
+                // Owner doesn't have files
+                System.out.println("owner doesnt have files");
+                return Result.error(ErrorCode.NOT_FOUND);
+            }
         }
 
         FileInfo file = searchForFile(userId, filename);
@@ -218,17 +229,18 @@ public class JavaDirectory implements Directory {
         }
 
         List<FileInfo> allFiles = new LinkedList<FileInfo>();
+        synchronized (userFiles) {
+            // Own files
+            if (userFiles.containsKey(userId)) {
+                allFiles.addAll(userFiles.get(userId));
+            }
 
-        // Own files
-        if(userFiles.containsKey(userId)) {
-            allFiles.addAll(userFiles.get(userId));
-        }
-
-        // Shared files
-        for(List<FileInfo> uFiles: userFiles.values()) {
-            for(FileInfo file: uFiles) {
-                if(file.getSharedWith().contains(userId)) {
-                    allFiles.add(file);
+            // Shared files
+            for (List<FileInfo> uFiles : userFiles.values()) {
+                for (FileInfo file : uFiles) {
+                    if (file.getSharedWith().contains(userId)) {
+                        allFiles.add(file);
+                    }
                 }
             }
         }
@@ -237,15 +249,17 @@ public class JavaDirectory implements Directory {
     }
 
     private FileInfo searchForFile(String userId, String filename) {
-        List<FileInfo> filesU = userFiles.get(userId);
+       synchronized (userFiles) {
+           List<FileInfo> filesU = userFiles.get(userId);
 
-        for(FileInfo f: filesU) {
-            if(f.getFilename().equals(filename)) {
-                return f;
-            }
-        }
+           for(FileInfo f: filesU) {
+               if(f.getFilename().equals(filename)) {
+                   return f;
+               }
+           }
 
-        return null;
+           return null;
+       }
     }
 
     @Override
@@ -258,23 +272,27 @@ public class JavaDirectory implements Directory {
             return Result.error(user.error());
         }
 
-        // Remove the specified user and all its files
-        List<FileInfo> userF = userFiles.get(userId);
+        synchronized (userFiles) {
+            // Remove the specified user and all its files
+            List<FileInfo> userF = userFiles.get(userId);
 
-        for (FileInfo file: userF) {
-            String fileId = String.format("%s_%s", userId, file.getFilename());
+            for (FileInfo file: userF) {
+                String fileId = String.format("%s_%s", userId, file.getFilename());
 
-            URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + file.getFilename(), ""));
-            new RestFilesClient(fileURI).deleteFile(fileId, "");
+                URI fileURI = URI.create(file.getFileURL().replace(RestFiles.PATH + "/" + userId + "_" + file.getFilename(), ""));
+                new RestFilesClient(fileURI).deleteFile(fileId, "");
+            }
+
+            userFiles.remove(userId);
         }
 
-        userFiles.remove(userId);
-
-        // Remove the specified user from all the sharedWith lists from the files
-        for(List<FileInfo> fileList: userFiles.values()) {
-            for (FileInfo file: fileList) {
-                if(file.getSharedWith().contains(userId)) {
-                    file.getSharedWith().remove(userId);
+        synchronized (userFiles) {
+            // Remove the specified user from all the sharedWith lists from the files
+            for(List<FileInfo> fileList: userFiles.values()) {
+                for (FileInfo file: fileList) {
+                    if(file.getSharedWith().contains(userId)) {
+                        file.getSharedWith().remove(userId);
+                    }
                 }
             }
         }
@@ -290,12 +308,13 @@ public class JavaDirectory implements Directory {
 
         for(URI u: fileURIs) {
             int currCapacity;
-
-            // Set current capacity
-            if(!servers.containsKey(u)) {
-                currCapacity = 0;
-            } else {
-                currCapacity = servers.get(u);
+            synchronized (servers) {
+                // Set current capacity
+                if(!servers.containsKey(u)) {
+                    currCapacity = 0;
+                } else {
+                    currCapacity = servers.get(u);
+                }
             }
 
             // If the capacity of u is lesser than the max capacity, update values
@@ -310,19 +329,23 @@ public class JavaDirectory implements Directory {
     }
 
     private void updateServerPlus(URI fileURI) {
-        int currCapacity = servers.get(fileURI);
+        synchronized (servers) {
+            int currCapacity = servers.get(fileURI);
 
-        currCapacity++;
+            currCapacity++;
 
-        servers.put(fileURI, currCapacity);
+            servers.put(fileURI, currCapacity);
+        }
     }
 
     private void updateServerMinus(URI fileURI) {
-        int currCapacity = servers.get(fileURI);
+        synchronized (servers) {
+            int currCapacity = servers.get(fileURI);
 
-        currCapacity--;
+            currCapacity--;
 
-        servers.put(fileURI, currCapacity);
+            servers.put(fileURI, currCapacity);
+        }
     }
 
 

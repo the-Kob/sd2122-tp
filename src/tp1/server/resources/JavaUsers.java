@@ -31,14 +31,16 @@ public class JavaUsers  implements Users{
 				user.getEmail() == null) {
             return Result.error(ErrorCode.BAD_REQUEST);
 		}
+		synchronized (users) {
+			// Check if userId already exists
+			if( users.containsKey(user.getUserId())) {
+				return Result.error(ErrorCode.CONFLICT);
+			}
 
-		// Check if userId already exists
-		if( users.containsKey(user.getUserId())) {
-			return Result.error(ErrorCode.CONFLICT);
+			//Add the user to the map of users
+			users.put(user.getUserId(), user);
 		}
 
-		//Add the user to the map of users
-		users.put(user.getUserId(), user);
 		return Result.ok(user.getUserId());
     }
 
@@ -86,13 +88,14 @@ public class JavaUsers  implements Users{
 		Result<User> retUser = retrieveUser(userId, password);
 
         if(!retUser.isOK()){
-
             return retUser;
         }
 
 		User mainUser = retrieveUser(userId, password).value();
 
-        users.remove(mainUser.getUserId());
+		synchronized (users) {
+			users.remove(mainUser.getUserId());
+		}
 
 		return Result.ok(mainUser);
     }
@@ -103,21 +106,25 @@ public class JavaUsers  implements Users{
 		if(pattern == null) {
 			return Result.ok( new ArrayList<User>(users.values()));
 		}
- 
-		if(users.isEmpty()) {
-			return Result.ok( new ArrayList<User>());
+
+ 		synchronized (users) {
+			if(users.isEmpty()) {
+				return Result.ok( new ArrayList<User>());
+			}
 		}
 
 		List<User> patternedUsers = new ArrayList<>();
 
-		for(Map.Entry<String, User> entry : users.entrySet()) {
-			User user = entry.getValue();
+		synchronized (users) {
+			for(Map.Entry<String, User> entry : users.entrySet()) {
+				User user = entry.getValue();
 
-			String fullNameCaps = user.getFullName().toUpperCase();
-			String patternToUpper = pattern.toUpperCase();
+				String fullNameCaps = user.getFullName().toUpperCase();
+				String patternToUpper = pattern.toUpperCase();
 
-			if(fullNameCaps.contains(patternToUpper)) {
-				patternedUsers.add(user);
+				if(fullNameCaps.contains(patternToUpper)) {
+					patternedUsers.add(user);
+				}
 			}
 		}
 
@@ -129,10 +136,12 @@ public class JavaUsers  implements Users{
 			return Result.error(ErrorCode.BAD_REQUEST);
 		}
 
-		User user = users.get(userId);
+		synchronized (users)  {
+			User user = users.get(userId);
 
-		if( user == null ) {
-			return Result.error(ErrorCode.NOT_FOUND);
+			if( user == null ) {
+				return Result.error(ErrorCode.NOT_FOUND);
+			}
 		}
 
 		return Result.ok(true);
@@ -143,22 +152,24 @@ public class JavaUsers  implements Users{
 			return Result.error(ErrorCode.BAD_REQUEST);
 		}
 
-		User user = users.get(userId);
+		synchronized (users) {
+			User user = users.get(userId);
 
-		if( user == null ) {
-			System.out.println("user doesnt exist");
-			return Result.error(ErrorCode.NOT_FOUND);
+			if( user == null ) {
+				System.out.println("user doesnt exist");
+				return Result.error(ErrorCode.NOT_FOUND);
+			}
+
+			if(password == null) {
+				return Result.error(ErrorCode.FORBIDDEN);
+
+			}
+
+			if( !user.getPassword().equals( password)) {
+				return Result.error(ErrorCode.FORBIDDEN);
+			}
+
+			return Result.ok(user);
 		}
-
-		if(password == null) {
-            return Result.error(ErrorCode.FORBIDDEN);
-
-		}
-
-		if( !user.getPassword().equals( password)) {
-            return Result.error(ErrorCode.FORBIDDEN);
-		}
-
-		return Result.ok(user);
 	}
 }
